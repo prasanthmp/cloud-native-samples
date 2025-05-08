@@ -1,0 +1,9 @@
+[package]
+name = "RustWebApp"
+version = "0.1.0"
+edition = "2018"
+
+[dependencies]
+actix-web = "4.0"
+tokio = { version = "1", features = ["full"] }
+hostname = "0.3"
