@@ -2,4 +2,12 @@ dockerized-apps/web-app/.DS_Store
 dockerized-apps/web-app/node-webapp/.DS_Store
 dockerized-apps/web-app/rust-webapp/.DS_Store
 dockerized-apps/web-app/go-webapp/.DS_Store
+dockerized-apps/web-app/dotnetcore-webapp/.DS_Store
+dockerized-apps/web-app/python-webapp/.DS_Store
+dockerized-apps/web-app/java-webapp/.DS_Store
 dockerized-apps/.DS_Store
+dockerized-apps/web-app/python-webapp/logs/.DS_Store
+dockerized-apps/web-app/dotnetcore-webapp/wwwroot/lib/.DS_Store
+dockerized-apps/web-app/dotnetcore-webapp/wwwroot/lib/bootstrap/.DS_Store
+dockerized-apps/web-app/dotnetcore-webapp/wwwroot/lib/bootstrap/dist/.DS_Store
+dockerized-apps/web-app/dotnetcore-webapp/wwwroot/.DS_Store

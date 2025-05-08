@@ -1,0 +1,28 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Home page";
+}
+
+<div style="font-family: Arial; padding: 2rem; text-align: center;">
+    <h1>.NET Core web app is running.</h1>
+
+    @if (!string.IsNullOrEmpty(Model.ServerName))
+    {
+        <h2>Server Name: @Model.ServerName</h2>
+    }
+    else
+    {
+        <h2>Server Name: Unavailable</h2>
+    }
+
+    @if (!string.IsNullOrEmpty(Model.ServerIP))
+    {
+        <h2>IP Address: @Model.ServerIP</h2>
+    }
+    else
+    {
+        <h2>IP Address: Unavailable</h2>
+    }
+</div>
+
