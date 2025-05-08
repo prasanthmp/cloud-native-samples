@@ -12,3 +12,10 @@ dockerized-apps/web-app/dotnetcore-webapp/wwwroot/lib/bootstrap/.DS_Store
 dockerized-apps/web-app/dotnetcore-webapp/wwwroot/lib/bootstrap/dist/.DS_Store
 dockerized-apps/web-app/dotnetcore-webapp/wwwroot/.DS_Store
 dockerized-apps/web-app/python-webapp/logs/app.log
+dockerized-apps/web-app/rust-webapp/target/*
+dockerized-apps/web-app/dotnetcore-webapp/bin/*
+dockerized-apps/web-app/dotnetcore-webapp/obj/*
+dockerized-apps/web-app/go-webapp/logs/*
+dockerized-apps/web-app/rust-webapp/Cargo.lock
+dockerized-apps/web-app/rust-webapp/.DS_Store
+
