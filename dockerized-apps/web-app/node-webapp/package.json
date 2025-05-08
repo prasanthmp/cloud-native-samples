@@ -1,0 +1,16 @@
+{
+  "name": "webapp",
+  "version": "1.0.0",
+  "description": "A simple Node.js web app displaying server name and IP.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "keywords": [],
+  "author": "Prasanth Prasad",
+  "license": "ISC",
+  "dependencies": {
+    "ejs": "^3.1.10",
+    "express": "^5.1.0"
+  }
+}
