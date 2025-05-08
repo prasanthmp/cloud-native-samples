@@ -1,2 +1,5 @@
 dockerized-apps/web-app/.DS_Store
 dockerized-apps/web-app/node-webapp/.DS_Store
+dockerized-apps/web-app/rust-webapp/.DS_Store
+dockerized-apps/web-app/go-webapp/.DS_Store
+dockerized-apps/.DS_Store
