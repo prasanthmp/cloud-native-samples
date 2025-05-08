@@ -4,25 +4,29 @@
     ViewData["Title"] = "Home page";
 }
 
-<div style="font-family: Arial; padding: 2rem; text-align: center;">
-    <h1>.NET Core web app is running.</h1>
+<div style="text-align: center;">
+    <h1>Welcome to .NET Core web app!</h1>
+    <img src="https://upload.wikimedia.org/wikipedia/commons/e/ee/.NET_Core_Logo.svg" alt="Logo" style="width: 200px; height: auto;" />
+    <h2>Server Information</h2>   
+    <p> This is a sample web application running on .NET Core.</p>
+    <p> It is designed to demonstrate the capabilities of .NET Core in a Dockerized environment.</p>
 
     @if (!string.IsNullOrEmpty(Model.ServerName))
     {
-        <h2>Server Name: @Model.ServerName</h2>
+        <h4>Server Name: @Model.ServerName</h4>
     }
     else
     {
-        <h2>Server Name: Unavailable</h2>
+        <h4>Server Name: Unavailable</h4>
     }
 
     @if (!string.IsNullOrEmpty(Model.ServerIP))
     {
-        <h2>IP Address: @Model.ServerIP</h2>
+        <h4>IP Address: @Model.ServerIP</h4>
     }
     else
     {
-        <h2>IP Address: Unavailable</h2>
+        <h4>IP Address: Unavailable</h4>
     }
 </div>
 

@@ -3,16 +3,21 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.Net;
 using System.Net.Sockets;
 
-namespace DotnetCoreWebapp.Pages;
+namespace dotnetcore_webapp.Pages;
 
 public class IndexModel : PageModel
 {
     private readonly ILogger<IndexModel> _logger;
 
     public string? ServerIP { get; set; }
-    public string? ServerName { get; set; }
+    public string? ServerName { get; set; }    
 
-    public void OnGet()
+    public IndexModel(ILogger<IndexModel> logger)
+    {
+        _logger = logger;
+    }
+
+public void OnGet()
     {
         try
         {
@@ -44,10 +49,5 @@ public class IndexModel : PageModel
             ServerIP = "Unavailable";
             _logger.LogError(ex, "Failed to retrieve server information.");
         }
-    }
-
-    public IndexModel(ILogger<IndexModel> logger)
-    {
-        _logger = logger;
     }
 }

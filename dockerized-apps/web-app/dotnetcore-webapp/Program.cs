@@ -1,10 +1,5 @@
 var builder = WebApplication.CreateBuilder(args);
 
-// Optional: configure logging levels or providers
-builder.Logging.ClearProviders();
-builder.Logging.AddConsole(); // Logs to console
-builder.Logging.SetMinimumLevel(LogLevel.Information);
-
 // Add services to the container.
 builder.Services.AddRazorPages();
 
@@ -19,12 +14,13 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseStaticFiles();
 
 app.UseRouting();
 
 app.UseAuthorization();
 
-app.MapRazorPages();
+app.MapStaticAssets();
+app.MapRazorPages()
+   .WithStaticAssets();
 
 app.Run();
