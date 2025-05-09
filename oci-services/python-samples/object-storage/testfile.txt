@@ -1,0 +1,1 @@
+Curated set of Python code samples using the Oracle Cloud Infrastructure (OCI) Python SDK for major OCI services. These snippets assume that you’ve set up the OCI SDK and your config file (typically at ~/.oci/config).
