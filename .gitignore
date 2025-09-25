@@ -18,4 +18,6 @@ dockerized-apps/web-app/dotnetcore-webapp/obj/*
 dockerized-apps/web-app/go-webapp/logs/*
 dockerized-apps/web-app/rust-webapp/Cargo.lock
 dockerized-apps/web-app/rust-webapp/.DS_Store
-
+oci-terraform-solutions/oke-monitoring-prometheus-grafana/terraform.local.tfvars
+.DS_Store
+dockerized-apps/web-app/rust-webapp/.DS_Store
