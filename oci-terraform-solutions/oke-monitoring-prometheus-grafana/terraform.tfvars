@@ -1,5 +1,5 @@
 # This file is used to define the variables for the Terraform configuration.
-# Make sure to keep this file secure as it contains sensitive information such as private keys and passwords.
+# Make sure to keep this file secure as it contains sensitive information such as passwords.
 
 # MUST CHANGE PARAMETERS
 #######################
@@ -46,7 +46,9 @@ fingerprint = "xxxx"
 # Note: The private key should be in PEM format and have the correct permissions (readable only by the owner)
 private_key_path = "xxxx/private.pem"
 
-# IP Address of the machine that runs terraform
+# IP Address of the machine that runs terraform. This could be your local machine or a CI/CD server
+# This IP address is used to restrict access to the Kubernetes API endpoint and Grafana/Prometheus dashboards
+# Make sure to use CIDR notation (e.g., x.x.x.x/32 for a single IP address)
 # Can access K8S endpoint from this
 # Can SSH to node
 # Can access grafana and prometheus dashboards
@@ -54,10 +56,21 @@ my_ipaddress = "xxxxx/32"
 
 # Image ID for K8S node
 # This changes by each region
+# https://docs.oracle.com/en-us/iaas/Content/ContEng/Reference/contengimagesshapes.htm
+# oci ce node-pool-options get --node-pool-option-id all
 node_image_id = "ocid1.image.xxxx"
+# Example image ID for AMD shape in Chicago: "ocid1.image.oc1.us-chicago-1.aaaaaaaa27lqjmb7nqayfiiwvkw5xrszkbfbxj3l33wp7ek7iajv3hptb7fq" # Chicago
 
 # All OCI services gateway for the region
-all_oci_services_gw = "all-XXXX-services-in-oracle-services-network"
+all_oci_services_gw = "all-REGION-KEY-services-in-oracle-services-network"
+# You can find the region key from the below link
+# https://docs.oracle.com/en-us/iaas/Content/General/Concepts/regions.htm
+# Example: all-ord-services-in-oracle-services-network # Chicago region
+# Example: all-iad-services-in-oracle-services-network # Ashburn region
+
+# Grafana Credentials
+grafana_user = "admin"
+grafana_pass = "xxxx"
 
 #######################
 # End of MUST CHANGE PARAMETERS
@@ -83,14 +96,14 @@ kubernetes = {
   type = "ENHANCED_CLUSTER" 
 }
 
+# Kubernetes Node Shape Configuration
 node_shape = {
   ocpus = 1 # OCPUs for node
   memory = 8 # Memory in GB for node
 }
 
-# Grafana Credentials
-grafana_user = "admin"
-grafana_pass = "xxxx"
+# Grafana dshboard URL to download and import dashboard
+# You can find more dashboards at https://grafana.com/grafana/dashboards
 dashboard_url = "https://grafana.com/api/dashboards/15661/revisions/2/download"
 
 # Prometheus URL
@@ -101,13 +114,6 @@ helm = {
   prometheus_repo = "https://prometheus-community.github.io/helm-charts"
   grafana_repo    = "https://grafana.github.io/helm-charts"
 }
-
-# OVERVIEW
-
-# This script is designed to automate the setup of Oracle Cloud Infrastructure (OCI) resources, including a Flask application deployment using Terraform.
-# It includes the creation of a VCN, subnets, compute instances, a PostgreSQL database, an OKE cluster, and a DevOps project for CI/CD.
-# It also sets up notifications for build and deployment status, and provides instructions for accessing the application once deployed.
-# This script is intended for educational purposes and should be modified according to your specific requirements.
 
 # PREREQUISITES - TO RUN THE SCRIPT
 
@@ -124,12 +130,9 @@ helm = {
 
 # Configuring and executing the Terraform script for OCI infrastructure setup and application deployment  
 # Step 1: Create OCI infrastructure with all resources
-
-# 1. Replace the values in terraform.tfvars with your actual configuration, including region, tenancy OCID, compartment OCID, user OCID, private key path, public SSH client CIDR, notification email, and other resource configurations.
-# 3. Run `terraform init` to initialize the Terraform configuration.
-# 4. Run `terraform plan` to see the resources that will be created.
-# 5. Run `terraform apply` to create the resources in Oracle Cloud Infrastructure. When prompted, type "yes" to confirm the creation of the resources.
-# 6. Once the script completes successfully, you will see Prometheus and Grafana URL
+# 1. Create a new file terraform.local.tfvars with the values in terraform.tfvars with your actual configuration, including region, tenancy OCID, compartment OCID, user OCID, private key path, public SSH client CIDR, notification email, and other resource configurations.
+# 2. Run `./build.sh` to initialize and apply the Terraform configuration.
+# 3. Once the script completes successfully, you will see Prometheus and Grafana URL
 
 # Step 2: Access Prometheus and Grafana dashboard
 # 1. Access Prometheus URL
@@ -137,8 +140,14 @@ helm = {
 
 # Step 3: Access Kubernetes cluster
 # Script will create kubeconfig and will copy to $HOME/.kube/config
-# 1. Setup kubectl
-
+# 1. Install kubectl
+# brew install kubectl
+# 2. Verify kubectl is installed
+# kubectl version --client
+# 3. Check nodes in the cluster
+# kubectl get nodes
+# 4. Check all namespaces
+# kubectl get namespaces
 
 # ADDITIONAL NOTES:
 
@@ -165,3 +174,4 @@ helm = {
 # 10. Make sure to keep your OCI CLI configuration secure and do not share it with anyone.
 
 # How to configure kubectl
+# Please refer to the Kubernetes documentation https://kubernetes.io/docs/tasks/tools/install-kubectl/
