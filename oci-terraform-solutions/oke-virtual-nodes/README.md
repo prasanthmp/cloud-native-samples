@@ -88,8 +88,6 @@ terraform destroy -var-file=terraform.local.tfvars
 
 ## Notes, caveats and tips
 
-- Prometheus/Grafana: The example Terraform mentions provisioning monitoring. Prometheus daemonsets are only supported on managed nodes (not on virtual nodes). If your workload requires DaemonSets, do not use virtual nodes.
-- Load balancer limits: If Load Balancer resources remain in `<PENDING>`, check service quotas in your OCI tenancy.
 - Timeouts: Provisioning node pools and copying kubeconfig can take several minutes. The Terraform configuration includes waits but be patient.
 - Multiple runs: If you re-run after a failed apply, consider running `terraform refresh` and check the state before applying again.
 
