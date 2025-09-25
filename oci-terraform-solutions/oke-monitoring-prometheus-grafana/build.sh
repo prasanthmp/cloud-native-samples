@@ -2,6 +2,8 @@
 
 START=$(date +%s)
 
+terraform init
+
 terraform apply -var-file="terraform.local.tfvars" -parallelism=5 -auto-approve
 
 END=$(date +%s)
