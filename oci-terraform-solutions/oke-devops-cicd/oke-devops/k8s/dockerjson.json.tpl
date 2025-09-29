@@ -1,0 +1,1 @@
+{"auths":{"${ocir_host}":{"username":"${ocir_username}","password":"${ocir_password}","email":"${ocir_email}","auth":"${ocir_auth}"}}}
