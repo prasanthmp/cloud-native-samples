@@ -18,7 +18,7 @@ spec:
       - name: ocirsecret
       containers:
       - name: my-webapp
-        image: ocir.us-chicago-1.oci.oraclecloud.com/idxlfhtrvfsa/webapp-repo/$OCI_BUILD_RUN_ID
+        image: ocir.us-chicago-1.oci.oraclecloud.com/<namespace>/webapp-repo/$OCI_BUILD_RUN_ID
         imagePullPolicy: Always 
         ports:
         - containerPort: 5100
