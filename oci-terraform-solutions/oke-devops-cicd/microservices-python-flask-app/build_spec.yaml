@@ -6,9 +6,9 @@ failImmediatelyOnError: true
 
 env:
   variables:
-    IMAGE_TAG: ocir.us-chicago-1.oci.oraclecloud.com/idxlfhtrvfsa/webapp-repo/$OCI_BUILD_RUN_ID
+    IMAGE_TAG: ocir.us-chicago-1.oci.oraclecloud.com/<namespace>/webapp-repo/$OCI_BUILD_RUN_ID
   vaultVariables:
-    AUTH_TOKEN_OCI: ocid1.vaultsecret.oc1.us-chicago-1.amaaaaaak6zxdwaa34ekann7vejtw4pbggvpgowubimsdbfbkhw7tcawdobq
+    AUTH_TOKEN_OCI: ocid1.vaultsecret.oc1.us-chicago-1.xxxx
   exportedVariables:
     - IMAGE_TAG
 
@@ -17,7 +17,7 @@ steps:
     timeoutInSeconds: 400
     name: "Export variable IMAGE_TAG"
     command: |
-      export IMAGE_TAG=ocir.us-chicago-1.oci.oraclecloud.com/idxlfhtrvfsa/webapp-repo/$OCI_BUILD_RUN_ID
+      export IMAGE_TAG=ocir.us-chicago-1.oci.oraclecloud.com/<namespace>/webapp-repo/$OCI_BUILD_RUN_ID
       echo "IMAGE_TAG: $IMAGE_TAG"
       echo "OCI_BUILD_RUN_ID: $OCI_BUILD_RUN_ID"    
 
@@ -25,16 +25,16 @@ steps:
     timeoutInSeconds: 400
     name: "Login to Docker Registry"
     command:
-      echo "$AUTH_TOKEN_OCI" | docker login ocir.us-chicago-1.oci.oraclecloud.com -u 'idxlfhtrvfsa/prasanth.prasad@oracle.com' --password-stdin
+      echo "$AUTH_TOKEN_OCI" | docker login ocir.us-chicago-1.oci.oraclecloud.com -u '<namespace>/xxxx@xxx.com' --password-stdin
 
   - type: Command
     timeoutInSeconds: 400
     name: "Build Docker Image"
     command:
-      docker build -t ocir.us-chicago-1.oci.oraclecloud.com/idxlfhtrvfsa/webapp-repo/$OCI_BUILD_RUN_ID .
+      docker build -t ocir.us-chicago-1.oci.oraclecloud.com/<namespace>/webapp-repo/$OCI_BUILD_RUN_ID .
 
   - type: Command
     timeoutInSeconds: 400
     name: "Push Docker Image"
     command: |
-      docker push ocir.us-chicago-1.oci.oraclecloud.com/idxlfhtrvfsa/webapp-repo/$OCI_BUILD_RUN_ID
+      docker push ocir.us-chicago-1.oci.oraclecloud.com/<namespace>/webapp-repo/$OCI_BUILD_RUN_ID
