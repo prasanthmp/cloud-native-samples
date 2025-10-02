@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-webapp
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: my-webapp
+  template:
+    metadata:
+      labels:
+        app: my-webapp
+      annotations:
+        rollout/restartedAt: 2025-09-28T03:10:01Z
+    spec:
+      imagePullSecrets:
+      - name: ocirsecret
+      containers:
+      - name: my-webapp
+        image: ocir.us-chicago-1.oci.oraclecloud.com/<namespace>/webapp-repo/$OCI_BUILD_RUN_ID
+        imagePullPolicy: Always 
+        ports:
+        - containerPort: 5100
+
