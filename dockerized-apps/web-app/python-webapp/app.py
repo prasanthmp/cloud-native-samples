@@ -6,7 +6,7 @@ import logging
 app = Flask(__name__)
 
 # Set up logging
-logging.basicConfig(filename='logs/app.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(filename='app.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 @app.route('/')
 def index():
@@ -26,4 +26,4 @@ def index():
     return render_template('index.html', server_name=server_name, server_ip=server_ip)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=5000)

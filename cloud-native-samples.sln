@@ -1,0 +1,32 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "dockerized-apps", "dockerized-apps", "{EC544C7B-7BB0-DD88-2504-BAE6FEA4D19C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "web-app", "web-app", "{4B8BE58F-CBA0-2AAA-0713-8733589C3AF7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dotnetcore-webapp", "dockerized-apps\web-app\dotnetcore-webapp\dotnetcore-webapp.csproj", "{85A0E2B1-39EC-896E-B96F-5331AB17216A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{85A0E2B1-39EC-896E-B96F-5331AB17216A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{85A0E2B1-39EC-896E-B96F-5331AB17216A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{85A0E2B1-39EC-896E-B96F-5331AB17216A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{85A0E2B1-39EC-896E-B96F-5331AB17216A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{4B8BE58F-CBA0-2AAA-0713-8733589C3AF7} = {EC544C7B-7BB0-DD88-2504-BAE6FEA4D19C}
+		{85A0E2B1-39EC-896E-B96F-5331AB17216A} = {4B8BE58F-CBA0-2AAA-0713-8733589C3AF7}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {764ADAB0-CD79-490D-A493-FC6238997C44}
+	EndGlobalSection
+EndGlobal
