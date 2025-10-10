@@ -8,6 +8,31 @@ provider "helm" {
   }
 }
 
+locals {
+  rendered_app_yaml_data = templatefile("${path.module}/k8s/app.yaml.tpl",{
+    docker_image      = var.webapp_docker_image
+    docker_image_port = var.webapp_docker_image_port
+  })
+
+    rendered_service_yaml_data = templatefile("${path.module}/k8s/service.yaml.tpl",{
+        docker_image_port = var.webapp_docker_image_port
+  })
+}
+
+resource "local_file" "app_file_spec" {
+  content  = local.rendered_app_yaml_data
+  filename = "${path.module}/k8s/app.yaml"
+
+  depends_on = [time_sleep.wait_for_kubeconfig]  
+}
+
+resource "local_file" "service_file_spec" {
+  content  = local.rendered_service_yaml_data
+  filename = "${path.module}/k8s/service.yaml"
+
+  depends_on = [local_file.app_file_spec]  
+}
+
 resource "helm_release" "nginx_ingress" {
   name       = "nginx-ingress"
   repository = "https://kubernetes.github.io/ingress-nginx"
@@ -30,17 +55,17 @@ resource "helm_release" "nginx_ingress" {
     })
   ]
 
-  depends_on = [time_sleep.wait_for_kubeconfig]
+  depends_on = [local_file.service_file_spec]
 }
 
 resource "kubectl_manifest" "app" {
   yaml_body = local_file.app_file_spec.content
-  depends_on = [local_file.app_file_spec]
+  depends_on = [helm_release.nginx_ingress]
 }
 
 resource "kubectl_manifest" "service" {
   yaml_body = local_file.service_file_spec.content
-  depends_on = [local_file.service_file_spec]
+  depends_on = [kubectl_manifest.app]
 }
 
 resource "kubectl_manifest" "ingress" {
