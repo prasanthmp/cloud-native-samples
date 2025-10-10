@@ -10,7 +10,7 @@ This workspace provisions an NGINX Ingress Controller on an OKE cluster and expo
 - `k8s/service.yaml` — ClusterIP Service for `hello-app`.
 - `k8s/ingress.yaml` — Ingress resource bound to the NGINX ingress controller.
 - `build.sh`, `delete.sh` — Helper scripts to apply and destroy the Terraform configuration.
-- `terraform.tfvars`, `terraform.local.tfvars` — Variable examples (copy `terraform.tfvars` to `terraform.local.tfvars` and set your OCIDs / private key path / IPs).
+- `terraform.tfvars` — Variable examples (copy `terraform.tfvars` to `terraform.local.tfvars` and set your OCIDs / private key path / IPs).
 
 ## Prerequisites
 
