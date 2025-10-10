@@ -101,3 +101,6 @@ oci-terraform-solutions/oke-ingress-lb/.terraform/providers/registry.terraform.i
 oci-terraform-solutions/oke-ingress-lb/.terraform/providers/registry.terraform.io/hashicorp/time/0.13.1/darwin_arm64/LICENSE.txt
 oci-terraform-solutions/oke-ingress-lb/.terraform/providers/registry.terraform.io/hashicorp/time/0.13.1/darwin_arm64/terraform-provider-time_v0.13.1_x5
 oci-terraform-solutions/oke-ingress-lb/.terraform/providers/registry.terraform.io/oracle/oci/7.22.0/darwin_arm64/terraform-provider-oci_v7.22.0
+oci-terraform-solutions/oke-ingress-lb/k8s/app.yaml
+oci-terraform-solutions/oke-ingress-lb/k8s/service.yaml
+oci-terraform-solutions/oke-ingress-lb/terraform.tfstate
