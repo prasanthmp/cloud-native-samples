@@ -11,3 +11,4 @@ variable "my_ipaddress" {}
 variable "node_image_id" {}
 variable "node_settings" {}
 variable "instance_names" {}
+variable "all_oci_services_gw" {}

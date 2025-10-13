@@ -120,7 +120,7 @@ resource oci_core_route_table oke-selfmanaged-cluster-private-routetable {
   }
   route_rules {
     description       = "Traffic to OCI services"
-    destination       = "all-phx-services-in-oracle-services-network"
+    destination       = var.all_oci_services_gw
     destination_type  = "SERVICE_CIDR_BLOCK"
     network_entity_id = oci_core_service_gateway.oke-selfmanaged-cluster-sgw.id
     route_type        = "STATIC"
