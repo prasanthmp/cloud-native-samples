@@ -1,6 +1,7 @@
 #!/bin/bash
 START=$(date +%s)
 
+terraform destroy -var-file="terraform.local.tfvars" -target=helm_release.nginx_ingress -auto-approve
 terraform destroy -var-file="terraform.local.tfvars" -auto-approve
 
 END=$(date +%s)
