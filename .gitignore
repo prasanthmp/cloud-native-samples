@@ -106,3 +106,4 @@ oci-terraform-solutions/oke-ingress-lb/k8s/service.yaml
 oci-terraform-solutions/oke-ingress-lb/terraform.tfstate
 oci-terraform-solutions/oke-ingress-lb/terraform.tfstate.backup
 oci-terraform-solutions/oke-devops-cicd/oke-devops/node-pool-options.json
+dockerized-apps/web-app/go-webapp/main
