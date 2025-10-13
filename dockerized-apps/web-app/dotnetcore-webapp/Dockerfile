@@ -1,22 +1,30 @@
-# Use the official .NET SDK image for build
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
-WORKDIR /app
+# ------------------------
+# Build Stage
+# ------------------------
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+WORKDIR /src
 
-# Copy csproj and restore dependencies
+# Copy the project file and restore dependencies
 COPY *.csproj ./
 RUN dotnet restore
 
-# Copy the rest of the app
-COPY . ./
-RUN dotnet publish -c Release -o out
+# Copy the rest of the source code
+COPY . .
 
-# Use a runtime-only image for running the app
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
+# Publish the app to the /app/publish directory
+RUN dotnet publish -c Release -o /app/publish
+
+# ------------------------
+# Runtime Stage
+# ------------------------
+FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS final
 WORKDIR /app
-COPY --from=build /app/out ./
 
-# Expose port (optional, but good practice)
-EXPOSE 80
+# Copy published app from build stage
+COPY --from=build /app/publish .
 
-# Entry point
-ENTRYPOINT ["dotnet", "DotNetCoreWebapp.dll"]
+# Expose the default port
+EXPOSE 8080
+
+# Start the app
+ENTRYPOINT ["dotnet", "dotnetcore-webapp.dll"]

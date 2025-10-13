@@ -14,7 +14,7 @@ RUN pip install Flask
 EXPOSE 5000
 
 # Set environment variable to disable buffering of logs
-ENV PYTHONUNBUFFERED 1
+ENV PYTHONUNBUFFERED=1
 
 # Run the application
 CMD ["python", "app.py"]
