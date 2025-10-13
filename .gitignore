@@ -128,3 +128,5 @@ oci-terraform-solutions/oke-ingress-path-based-routing/.terraform/providers/regi
 oci-terraform-solutions/oke-ingress-path-based-routing/.terraform/providers/registry.terraform.io/hashicorp/time/0.13.1/darwin_arm64/LICENSE.txt
 oci-terraform-solutions/oke-ingress-path-based-routing/.terraform/providers/registry.terraform.io/hashicorp/time/0.13.1/darwin_arm64/terraform-provider-time_v0.13.1_x5
 oci-terraform-solutions/oke-ingress-path-based-routing/.terraform/providers/registry.terraform.io/oracle/oci/7.22.0/darwin_arm64/terraform-provider-oci_v7.22.0
+oci-terraform-solutions/oke-ingress-path-based-routing/terraform.tfstate
+oci-terraform-solutions/oke-ingress-path-based-routing/terraform.tfstate

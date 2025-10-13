@@ -71,8 +71,8 @@ all_oci_services_gw = "all-REGION-KEY-services-in-oracle-services-network"
 #######################
 # End of MUST CHANGE PARAMETERS
 
-webapp_docker_image = "prasanthprasad/webapp:v1.18"
-webapp_docker_image_port = 5100
+webapp_docker_image = "prasanthprasad/python-webapp:v1.1"
+webapp_docker_image_port = 5000
 
 # Additional Configuration
 # Cloud Network Configuration
