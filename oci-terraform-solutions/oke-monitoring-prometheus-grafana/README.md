@@ -19,7 +19,6 @@ The configurations in this workspace were designed to be a reproducible example 
 - `oke.tf` - OKE cluster and nodepool definitions
 - `prometheus.tf` - Helm/manifest deployment for Prometheus
 - `grafana.tf` - Helm/manifest deployment for Grafana and dashboards
-- `prometheus-values.yaml` - Prometheus Helm values (customize alerting, scraping)
 - `variables.tf` - Input variable declarations
 - `terraform.tfvars` / `terraform.local.tfvars` - Example variable values (edit locally)
 - `outputs.tf` - Useful outputs (service endpoints, kubeconfig path, etc.)

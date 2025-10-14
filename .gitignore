@@ -130,3 +130,14 @@ oci-terraform-solutions/oke-ingress-path-based-routing/.terraform/providers/regi
 oci-terraform-solutions/oke-ingress-path-based-routing/.terraform/providers/registry.terraform.io/oracle/oci/7.22.0/darwin_arm64/terraform-provider-oci_v7.22.0
 oci-terraform-solutions/oke-ingress-path-based-routing/terraform.tfstate
 oci-terraform-solutions/oke-ingress-path-based-routing/terraform.tfstate
+oci-terraform-solutions/oke-ingress-path-based-routing/k8s/node-service.yaml
+oci-terraform-solutions/oke-ingress-path-based-routing/k8s/node-webapp.yaml
+oci-terraform-solutions/oke-ingress-path-based-routing/k8s/python-service.yaml
+oci-terraform-solutions/oke-ingress-path-based-routing/k8s/python-webapp.yaml
+oci-terraform-solutions/oke-ingress-path-based-routing/kubeconfig
+oci-terraform-solutions/oke-ingress-path-based-routing/terraform.tfstate
+oci-terraform-solutions/oke-ingress-path-based-routing/terraform.tfstate.backup
+oci-terraform-solutions/oke-ingress-path-based-routing/terraform.tfstate
+oci-terraform-solutions/oke-ingress-path-based-routing/terraform_runtime.log
+oci-terraform-solutions/oke-ingress-path-based-routing/terraform.tfstate
+oci-terraform-solutions/oke-aiml-jupyterhub/terraform.local.tfvars
