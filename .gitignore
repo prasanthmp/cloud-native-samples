@@ -164,3 +164,8 @@ oci-terraform-solutions/oke-aiml-jupyterhub/kubeconfig
 oci-terraform-solutions/oke-aiml-jupyterhub/terraform_runtime.log
 oci-terraform-solutions/oke-aiml-jupyterhub/terraform.tfstate.backup
 oci-terraform-solutions/oke-aiml-jupyterhub/terraform_destroy_runtime.log
+oci-terraform-solutions/oke-selfmanaged-nodes-monitoring/terraform.local.tfvars
+oci-terraform-solutions/oke-selfmanaged-nodes-monitoring/instance-ssh/ssh-private.key
+oci-terraform-solutions/oke-selfmanaged-nodes-monitoring/instance-ssh/ssh-public-key.pub
+oci-terraform-solutions/oke-selfmanaged-nodes/.terraform/providers/registry.terraform.io/hashicorp/http/3.5.0/darwin_arm64/LICENSE.txt
+oci-terraform-solutions/oke-selfmanaged-nodes/.terraform/providers/registry.terraform.io/hashicorp/http/3.5.0/darwin_arm64/terraform-provider-http_v3.5.0_x5
