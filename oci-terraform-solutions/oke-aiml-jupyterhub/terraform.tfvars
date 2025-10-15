@@ -86,7 +86,7 @@ cloud_network = {
 # This section defines the Kubernetes configuration for the OKE cluster
 kubernetes = {
   version = "v1.33.1" # Specify the Kubernetes version for the OKE cluster
-  cluster_name = "oke-mon-cluster" # Name of the OKE cluster
+  cluster_name = "oke-aiml-cluster" # Name of the OKE cluster
   node_pool_name = "node-pool" # Name of the node pool
   node_pool_shape = "VM.Standard.E4.Flex" # Shape for the node pool VM.Standard.E4.Flex
   number_of_nodes = 1 # Number of nodes in the OKE cluster

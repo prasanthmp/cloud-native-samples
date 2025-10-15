@@ -11,8 +11,6 @@ OKE_CLUSTER_OCID=$2
 TAG_VALUE=$3
 EXTERNAL_IP=$4
 
-echo "🔎 Searching for Load Balancers created by OKE cluster: $OKE_CLUSTER_OCID ..."
-
 # Get matching LBs by checking display-name for cluster ID
 LB_IDS=$(oci lb load-balancer list \
   --compartment-id "$COMPARTMENT_OCID" \
@@ -23,15 +21,11 @@ LB_IDS=$(oci lb load-balancer list \
 if [ -z "$LB_IDS" ]; then
   echo "❌ No load balancers found for cluster $OKE_CLUSTER_OCID"
   exit 0
-else
-  echo "✅ Found load balancers:"
-  echo "$LB_IDS"
 fi
 
 i=1
 
 for LB_ID in $LB_IDS; do
-  echo "⚡ Processing LB: $LB_ID[0]"
 
     # Get the current display name of the load balancer
     LB_IP=$(oci lb load-balancer get \
@@ -54,10 +48,8 @@ for LB_ID in $LB_IDS; do
         --load-balancer-id "$LB_ID" \
         --query "data.\"lifecycle-state\"" \
         --raw-output)
-        echo "Current state of '$LB_ID': $STATE"
 
         if [ "$STATE" == "ACTIVE" ]; then
-        echo "✅ Load Balancer '$LB_ID' is ACTIVE. Proceeding..."
         break
         fi
 
@@ -72,7 +64,6 @@ for LB_ID in $LB_IDS; do
     done
 
   NEW_TAG="OKE-$TAG_VALUE-LB-$i"
-  echo "🔖 Tagging Load Balancer '$LB_ID' with new tag: $NEW_TAG"
 
     # Update the LB with the new tag
   oci lb load-balancer update \
@@ -83,7 +74,5 @@ for LB_ID in $LB_IDS; do
   # Increment counter
   i=$((i+1))
 
-  echo "✅ Updated LB $LB_ID"
+  echo "✅ Updated Load Balancer '$LB_ID' with new tag: $NEW_TAG"  
 done
-
-echo "✅ Tagging complete!"
