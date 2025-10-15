@@ -21,9 +21,4 @@ variable "helm" {
     grafana_repo    = "https://grafana.github.io/helm-charts"
   }
 }
-variable "jupyterhub_token" {
-  
-}
-variable "jupyterhub_password" {
-
-}
+variable "jupyterhub_token" {}

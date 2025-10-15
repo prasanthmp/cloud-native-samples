@@ -133,3 +133,17 @@ resource "null_resource" "tag_oke_lbs_grafana" {
     null_resource.tag_oke_lbs_prometheus
   ]
 }
+
+
+resource "null_resource" "tag_oke_lbs_jupyterhub" {
+  provisioner "local-exec" {
+    command = "chmod +x ${path.module}/tag_oke_lbs.sh"
+  }
+
+  provisioner "local-exec" {
+    command = "${path.module}/tag_oke_lbs.sh ${var.compartment_ocid} ${oci_containerengine_cluster.oke-mon-cluster.id} ${var.kubernetes.cluster_name}-jupyterhub ${data.external.jupyterhub_ip.result.external_ip}"
+    }
+  
+  depends_on = [
+    data.external.jupyterhub_ip  ]
+}

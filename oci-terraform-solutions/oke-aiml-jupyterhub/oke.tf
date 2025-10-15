@@ -80,18 +80,6 @@ data "oci_containerengine_cluster_kube_config" "kubeconfig" {
   token_version = "2.0.0"
 }
 
-# provider "kubernetes" {
-#   host                   = yamldecode(data.oci_containerengine_cluster_kube_config.kubeconfig.content).clusters[0].cluster.server
-#   cluster_ca_certificate = base64decode(
-#     yamldecode(data.oci_containerengine_cluster_kube_config.kubeconfig.content).clusters[0].cluster["certificate-authority-data"]
-#   )
-#   exec {
-#     api_version = yamldecode(data.oci_containerengine_cluster_kube_config.kubeconfig.content).users[0].user.exec.apiVersion
-#     command     = yamldecode(data.oci_containerengine_cluster_kube_config.kubeconfig.content).users[0].user.exec.command
-#     args        = yamldecode(data.oci_containerengine_cluster_kube_config.kubeconfig.content).users[0].user.exec.args
-#   }
-# }
-
 # Null resource: generate kubeconfig locally
 resource "null_resource" "generate_kubeconfig" {
   provisioner "local-exec" {

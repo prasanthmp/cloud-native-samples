@@ -162,3 +162,5 @@ oci-terraform-solutions/oke-aiml-jupyterhub/.terraform.tfstate.lock.info
 oci-terraform-solutions/oke-aiml-jupyterhub/terraform.tfstate
 oci-terraform-solutions/oke-aiml-jupyterhub/kubeconfig
 oci-terraform-solutions/oke-aiml-jupyterhub/terraform_runtime.log
+oci-terraform-solutions/oke-aiml-jupyterhub/terraform.tfstate.backup
+oci-terraform-solutions/oke-aiml-jupyterhub/terraform_destroy_runtime.log
