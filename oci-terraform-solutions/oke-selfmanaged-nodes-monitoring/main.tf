@@ -54,8 +54,8 @@ resource oci_core_vcn vcn-oke-managed {
   ]
 
   compartment_id = var.compartment_ocid
-  display_name = "vcn-oke-managed"
-  dns_label    = "okemoncluster"
+  display_name = "vcn-oke"
+  dns_label    = "vcnokecluster"
 }
 
 # Node subnet

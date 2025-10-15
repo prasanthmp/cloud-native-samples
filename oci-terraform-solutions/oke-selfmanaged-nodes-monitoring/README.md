@@ -33,6 +33,7 @@ Unlike managed node pools (OCI-managed), self-managed nodes are compute instance
 	- `node_image_id` — region-specific image OCID suitable for your chosen shape
 
 - Do not commit `terraform.local.tfvars` or private keys to version control.
+- Copy the SSH public key to the /instance-ssh folder. This is required to SSH to the self-managed instance using your private key.
 
 ## How it works (high level)
 
