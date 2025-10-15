@@ -101,7 +101,7 @@ node_shape = {
 
 # Grafana Credentials
 grafana_user = "admin"
-grafana_pass = "admin123"
+grafana_pass = "xxx-xxx-xxx"
 dashboard_url = "https://grafana.com/api/dashboards/15661/revisions/2/download"
 
 # Prometheus URL
@@ -115,8 +115,7 @@ helm = {
   jupyterhub_version = "4.3.0"
 }
 
-jupyterhub_token = "myTestToken123" # Token to access JupyterHub
-jupyterhub_password = "myTestPassword123" # Password to access JupyterHub
+jupyterhub_token = "xxxxx-xxx-xx" # Token to access JupyterHub
 
 # OVERVIEW
 
