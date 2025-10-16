@@ -1,4 +1,4 @@
-# Image Recognition API
+# Image Recognition API using a pre-trained deep learning model
 
 This project is a sample AI/ML microservice for image recognition, designed to be containerized and deployed in cloud-native environments. It demonstrates how to build, package, and run a Python-based image recognition API using modern DevOps and cloud-native practices.
 
