@@ -61,186 +61,102 @@ The configurations in this workspace were designed to be a reproducible example 
 3. Init and apply the changes (or use the convenience script):
 
 ```zsh
+   # JupyterHub on OKE with Monitoring
+
+   This workspace provisions a JupyterHub deployment on an Oracle Kubernetes Engine (OKE) cluster and includes a Prometheus + Grafana monitoring stack. It uses Terraform (providers + Helm) to provision the OKE cluster, node pool, JupyterHub Helm chart, and monitoring components. The setup is intended as a reproducible example you can adapt to your OCI tenancy.
+
+   Contents
+
+   - `main.tf`, `oke.tf` — Core networking and OKE cluster resources.
+   - `jupyter.tf` — Helm/manifest deployment for JupyterHub (configurable image and auth settings).
+   - `prometheus.tf`, `grafana.tf` — Monitoring stack (Prometheus + Grafana) and dashboards.
+   - `variables.tf`, `terraform.tfvars`, `terraform.local.tfvars` — Variables and example values. Keep secrets in `terraform.local.tfvars` and do not commit it.
+   - `outputs.tf` — Useful outputs (endpoints, kubeconfig path, etc.).
+   - `build.sh`, `delete.sh`, `delete-mon.sh` — Helper scripts to deploy and tear down the stack.
+   - `kubeconfig` — (generated after apply) kubeconfig file for interacting with the cluster.
+
+   Prerequisites
+
+   - Terraform >= 1.0
+   - OCI CLI configured (`oci setup config`) or environment variables for authentication
+   - kubectl (to interact with the cluster)
+   - Helm (optional; Terraform installs via provider)
+   - Sufficient OCI quotas/permissions for VCNs, OKE, compute, and Load Balancers
+
+   Quickstart
+
+   1. Copy variables and set your values:
+
+   ```bash
+   cd oci-terraform-solutions/oke-aiml-jupyterhub
+   cp terraform.tfvars terraform.local.tfvars
+   # Edit terraform.local.tfvars and set tenancy/user/compartment OCIDs, private_key_path, region, my_ipaddress, etc.
+   ```
+
+   2. Deploy (helper script):
+
+   ```bash
    ./build.sh
-```
+   ```
 
-4. After apply completes, the `kubeconfig` file will be available in this workspace (and `outputs.tf` prints the path). Check cluster:
+   Or run Terraform directly:
 
-```zsh
+   ```bash
+   terraform init
+   terraform plan -var-file=terraform.local.tfvars -out plan.tfplan
+   terraform apply plan.tfplan
+   ```
+
+   3. After apply completes:
+
+   - A `kubeconfig` file will be generated in the workspace and may be copied to `$HOME/.kube/config` by the provisioning steps.
+   - Check cluster state:
+
+   ```bash
    kubectl get nodes
-```
+   kubectl -n jhub get pods
+   kubectl -n monitoring get pods
+   ```
 
-5. Access Jupyterhub
+   Accessing services
 
-Terraform outputs (or the Terraform state) will include the endpoints Jupyterhub. To list outputs:
+   - Use `terraform output` to find endpoints for JupyterHub, Grafana and Prometheus (if exposed via Load Balancer):
 
-```zsh
+   ```bash
    terraform output
-```
+   ```
 
-5. Access Grafana and Prometheus
+   - If an endpoint is private, ensure your client IP is included in `my_ipaddress` so you can access the cluster API and dashboards.
 
-Terraform outputs (or the Terraform state) will include the endpoints for Grafana and Prometheus. To list outputs:
+   Destroy (cleanup)
 
-```zsh
-   terraform output
-```
+   ```bash
+   ./delete.sh
+   # or to remove monitoring only:
+   ./delete-mon.sh
+   ```
 
-If a service is exposed via an OCI Load Balancer, the external IP/DNS will be shown in the outputs.
+   Common troubleshooting
 
-## Scripts
-- `build.sh` — wrapper script that runs `terraform init` and `terraform apply` with recommended options. Use it for the full stack deployment.
-- `delete.sh` — destroys all Terraform-managed resources in this workspace (full teardown).
-- `delete-mon.sh` — destroys only monitoring-related resources (Prometheus/Grafana) if provided.
-- `tag_oke_lbs.sh` — tags OCI load balancers created by OKE (useful for billing or identification).
+   - kubectl can't connect: ensure `KUBECONFIG` points to the generated kubeconfig or `$HOME/.kube/config`, and that your client IP is allowed if the API endpoint is private.
+   - Terraform permission errors: verify IAM policies grant the user the ability to create OKE, networking, compute and load balancer resources.
+   - Helm / chart failures: inspect pod logs (`kubectl -n <ns> logs <pod>`) and Helm release status (`helm -n <ns> status <release>`).
+   - Load Balancers stuck in `<PENDING>`: check tenancy quotas and region limits in the OCI Console.
 
-Always read scripts before running them and ensure `terraform.tfvars` contains correct values.
+   Security notes
 
-## Cleanup
-To destroy everything created by Terraform in this workspace:
+   - Do not commit `terraform.local.tfvars`, `kubeconfig` or private keys to source control.
+   - Use OCI Vault for secrets where possible.
+   - The monitoring stack in this example may expose dashboards without strong auth—treat this as a demo-only configuration unless you add access controls.
 
-```zsh
-./delete.sh
-```
+   Next steps / suggestions
 
-To destroy only monitoring components (if available):
+   - Replace dummy auth in JupyterHub with a production identity connector (OAuth/LDAP) if using in real projects.
+   - Add persistent storage classes and PVCs for user notebooks.
+   - Migrate Terraform state to remote backend (OCI Object Storage) for team collaboration.
 
-```zsh
-./delete-mon.sh
-```
+   License
 
-If you prefer Terraform commands directly:
-
-```zsh
-terraform destroy
-```
-
-## Common variables and outputs
-- Edit `terraform.tfvars` or `terraform.local.tfvars` to provide values like `compartment_ocid`, `region`, `ssh_public_key`, and `cluster_name`.
-- After apply, check `terraform output` to find:
-  - `kubeconfig_path` (path to generated kubeconfig)
-  - `grafana_endpoint` (external URL or IP)
-  - `prometheus_endpoint`
-
-If those outputs are missing, the project may be configured to create resources with no external LB — check `grafana.tf` and `prometheus.tf` to see whether services are NodePort / ClusterIP / LoadBalancer.
-
-## Troubleshooting
-- "kubectl can't connect": ensure `KUBECONFIG` points to `./kubeconfig` or `$HOME/.kube/config` after the build and that your local IP (if using private endpoints) is allowed.
-- "Terraform apply fails with permission denied": verify OCI user has the required IAM policies and API key configuration.
-- Helm release issues: describe pods and check Helm releases with `helm list -n monitoring` or  `helm list -n jhub` or the namespace used by the manifests.
-
-
-Useful commands:
-
-```zsh
-kubectl -n jhub get pods
-kubectl -n monitoring get pods
-kubectl -n monitoring logs deployment/<prometheus-or-grafana-deployment>
-helm -n monitoring status <release-name>
-terraform show
-terraform output
-```
-
-## Security notes
-- Do not commit sensitive files (like real `kubeconfig` or `terraform.tfvars` with secret values) into version control.
-- Use OCI Vault or environment variables for secrets where possible.
-- Do not use this in production as the prometheus (no authentication) and grafana (unsecure authentication) is exposed to the configued IP.
-
-## License
-This repository is provided under the MIT License. See `LICENSE` if included in the workspace.
-
-## Practical usage examples
-
-Here are concrete commands and examples you can copy/paste to work with this repository.
-
-1) Initialize and preview the plan:
-
-```zsh
-terraform init
-terraform plan -out tfplan
-terraform show -no-color tfplan
-```
-
-2) Apply (full stack) using the convenience script:
-
-```zsh
-./build.sh
-```
-
-Or with Terraform directly:
-
-```zsh
-terraform apply -var-file="terraform.local.tfvars" -auto-approve
-```
-
-3) Cluster checks:
-
-```zsh
-kubectl get nodes
-kubectl -n monitoring get pods
-```
-
-4) Check Terraform outputs (example template):
-
-```zsh
-terraform output
-# Example output format (values will differ):
-# grafana_endpoint = "http://GRAFANA_IP"
-# prometheus_endpoint = "http://PROMETHEUS_IP"
-# jupyterhub_endpoint = "http://JUPYTERHUB_IP"
-# kubeconfig_path = "./kubeconfig"
-```
-
-Jupyterhub/Prometheus/Grafana services are exposed via an OCI Load Balancer, the external DNS/IP will be present in the outputs.
-
-## Scripts reference
-
-This repo includes a few helper scripts. Read them before running; brief descriptions follow.
-
-- `build.sh`
-   - Runs `terraform apply -var-file="terraform.local.tfvars" -parallelism=5 -auto-approve` and logs the run time to `terraform_runtime.log`.
-   - After a successful run a `kubeconfig` file will be present in the workspace and set to default path $HOME/.kube/config.
-   - Logs runtime to `terraform_runtime.log`.   
-
-- `delete.sh`
-   - Runs `terraform destroy` with the `terraform.local.tfvars` file. The script first attempts to target monitoring-related null_resources to tear down monitoring pieces, then runs a full destroy.
-   - Logs runtime to `terraform_destroy_runtime.log`.
-
-- `delete-mon.sh`
-   - Destroys only the monitoring-related resources (Prometheus/Grafana) by targeting the same null_resources used during install. Useful when you want to re-create monitoring without destroying the cluster.
-   - Logs runtime to `terraform_destroy_partial_runtime.log`.
-
-- `tag_oke_lbs.sh`
-   - Uses the OCI CLI to discover Load Balancers created by an OKE cluster (searches defined-tags / CreatedBy) and updates each LB with a freeform tag and a standardized display name `OKE-<tag>-LB-#`.
-
-## terraform.tfvars.example
-
-To make onboarding easier, a `terraform.tfvars.example` file has been added to this workspace. Copy it to `terraform.tfvars` (or `terraform.local.tfvars`) and replace placeholders with your real OCIDs, key paths and IP ranges before running Terraform.
-
-```zsh
-cp terraform.tfvars.example terraform.tfvars
-# edit terraform.tfvars and then run
-```
-
-## Notes & troubleshooting references
-- If a Load Balancer shows `<PENDING>`, check limits in the OCI console for the tenancy and region.
-- Prometheus requires managed nodes (not virtual nodes) for DaemonSets; if using virtual nodes, adjust the Prometheus deployment accordingly.
-- If `kubectl` cannot connect, verify `KUBECONFIG`, network ACLs (your IP may need to be allowed in cluster API ingress CIDR), and that the cluster kubelet nodes are in `Ready` state.
-
-
-## Actual Terraform outputs (from current state)
-Below are the current Terraform outputs captured from the workspace. Sensitive values have been redacted where appropriate.
-
-- cluster_id: `ocid1.cluster.oc1.us-chicago-1.xxxxxxxxxx`
-- compartment_ocid: `ocid1.compartment.oc1..xxxxxxxxxxx`
-- grafana_admin_username: `admin`
-- grafana_admin_password: (sensitive, not displayed)
-- grafana_url: `http://207.207.207.207`
-- prometheus_url: `http://170.9.9.9`
-
-If you want the full unredacted outputs or machine-readable JSON, run:
-
-```zsh
-terraform output -json
+   See the repository `LICENSE` file at the project root for license terms.
 ```
 
