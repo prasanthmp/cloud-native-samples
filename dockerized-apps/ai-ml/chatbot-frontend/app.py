@@ -24,7 +24,7 @@ Type your message below and press **Send** or hit **Enter** to interact with the
 # --- Tips / Example Prompts ---
 st.info("""
 **💡 Tips & Example Prompts**
-- Ask about cloud services: "Explain OCI in simple terms."
+- Ask about cloud services: "Explain Oracle Cloud Infrastructure in simple terms."
 - Get coding help: "How do I write a Python function to sort a list?"
 - Ask general knowledge: "Tell me about the Brooklyn Bridge."
 - Ask for definitions or explanations: "What is Kubernetes and why is it used?"
