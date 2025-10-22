@@ -209,3 +209,6 @@ oci-terraform-solutions/oke-aiml-image-recognition-api/terraform.tfstate
 oci-terraform-solutions/oke-aiml-image-recognition-api/terraform.tfstate.backup
 oci-terraform-solutions/oke-aiml-image-recognition-api/terraform.local.tfvars
 oci-terraform-solutions/oke-aiml-image-recognition-api/k8s/app.yaml
+dockerized-apps/ai-ml/image-recognition-api/car.jpg
+dockerized-apps/ai-ml/image-recognition-api/cat.jpg
+dockerized-apps/ai-ml/image-recognition-api/dog.jpg
