@@ -180,9 +180,7 @@ terraform output
 # kubeconfig_path = "./kubeconfig"
 ```
 
-5) Test cluster autoscaling (Scale up/Scale down)
-
-Scale up testing
+## Test cluster autoscaling - Scale up
 
 - Create a new deployment
 
@@ -193,7 +191,7 @@ kubectl get nodes
 ```
 Go to Grafana dashboard and check node size (It should increase to 4 (using default load-test.yaml))
 
-Scale down testing
+## Test cluster autoscaling - Scale down
 
 - Delete deployment
 
