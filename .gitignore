@@ -235,3 +235,4 @@ oci-terraform-solutions/oke-aiml-chat-agent/terraform.local.tfvars
 oci-terraform-solutions/oke-aiml-chat-agent/terraform.tfstate
 oci-terraform-solutions/oke-aiml-chat-agent/terraform.tfstate.backup
 oci-terraform-solutions/oke-aiml-chat-agent/.terraform.lock.hcl
+oci-terraform-solutions/oke-autoscaler-monitoring/terraform.local.tfvars
