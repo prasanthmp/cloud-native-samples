@@ -201,6 +201,67 @@ variable "devops_build_stage_name" {
   default     = "build-and-deploy-training"
 }
 
+variable "create_devops_deploy_pipeline" {
+  type        = bool
+  description = "If true, creates OCI DevOps deploy pipeline for serving deployment and wires it after the build stage."
+  default     = true
+}
+
+variable "devops_deploy_pipeline_name" {
+  type        = string
+  description = "OCI DevOps deploy pipeline display name for serving deployment."
+  default     = "mlflow-serving-deploy-pipeline"
+}
+
+variable "devops_deploy_command_artifact_name" {
+  type        = string
+  description = "Display name for the command spec deploy artifact used by serving deploy stage."
+  default     = "deploy-serving-command-spec"
+}
+
+variable "devops_deploy_stage_name" {
+  type        = string
+  description = "OCI DevOps deploy stage display name for serving deployment."
+  default     = "deploy-serving-to-oke"
+}
+
+variable "devops_trigger_deploy_stage_name" {
+  type        = string
+  description = "OCI DevOps build stage name that triggers the deploy pipeline."
+  default     = "trigger-serving-deploy"
+}
+
+variable "devops_deploy_stage_timeout_in_seconds" {
+  type        = number
+  description = "Timeout in seconds for the serving deploy stage."
+  default     = 3600
+}
+
+variable "devops_deploy_stage_shape_name" {
+  type        = string
+  description = "Compute shape for OCI DevOps deploy shell stage container instance."
+  default     = "CI.Standard.E4.Flex"
+}
+
+variable "devops_deploy_stage_shape_ocpus" {
+  type        = number
+  description = "OCPUs for OCI DevOps deploy shell stage container instance."
+  default     = 1
+}
+
+variable "devops_deploy_stage_shape_memory_in_gbs" {
+  type        = number
+  description = "Memory in GBs for OCI DevOps deploy shell stage container instance."
+  default     = 2
+}
+
+variable "devops_deploy_stage_subnet_id" {
+  type        = string
+  description = "Subnet OCID for OCI DevOps deploy shell stage container instance. If null, uses the Terraform-created Data Science subnet."
+  default     = null
+  nullable    = true
+}
+
 variable "devops_build_stage_image" {
   type        = string
   description = "OCI DevOps build stage image"
@@ -329,6 +390,42 @@ variable "devops_build_ocir_auth_token_secret_ocid" {
   description = "OCI Vault secret OCID containing OCIR auth token. Build script can fetch and decode this secret at runtime when OCIR_AUTH_TOKEN is empty."
   default     = null
   nullable    = true
+}
+
+variable "serving_k8s_namespace" {
+  type        = string
+  description = "Kubernetes namespace for serving deployment."
+  default     = "mlflow"
+}
+
+variable "serving_k8s_deployment_name" {
+  type        = string
+  description = "Kubernetes deployment name for serving API."
+  default     = "mlflow-serving"
+}
+
+variable "serving_k8s_service_name" {
+  type        = string
+  description = "Kubernetes service name for serving API."
+  default     = "mlflow-serving"
+}
+
+variable "serving_mlflow_tracking_uri" {
+  type        = string
+  description = "MLflow tracking URI passed to serving deployment."
+  default     = "http://129.80.216.101"
+}
+
+variable "serving_mlflow_model_name" {
+  type        = string
+  description = "Registered MLflow model name loaded by serving API."
+  default     = "iris-logreg-model"
+}
+
+variable "serving_mlflow_model_stage" {
+  type        = string
+  description = "MLflow model stage loaded by serving API."
+  default     = "Production"
 }
 
 variable "create_ocir_training_repository" {

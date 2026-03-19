@@ -83,6 +83,21 @@ output "devops_build_stage_id" {
   value       = var.create_devops_pipeline ? oci_devops_build_pipeline_stage.build_and_deploy[0].id : null
 }
 
+output "devops_build_trigger_deploy_stage_id" {
+  description = "OCI DevOps build stage OCID that triggers serving deploy pipeline"
+  value       = var.create_devops_pipeline && var.create_devops_deploy_pipeline ? oci_devops_build_pipeline_stage.trigger_serving_deploy[0].id : null
+}
+
+output "devops_deploy_pipeline_id" {
+  description = "OCI DevOps deploy pipeline OCID for serving deployment"
+  value       = var.create_devops_pipeline && var.create_devops_deploy_pipeline ? oci_devops_deploy_pipeline.serving[0].id : null
+}
+
+output "devops_deploy_stage_id" {
+  description = "OCI DevOps deploy stage OCID for serving deployment"
+  value       = var.create_devops_pipeline && var.create_devops_deploy_pipeline ? oci_devops_deploy_stage.deploy_serving_shell[0].id : null
+}
+
 output "devops_github_trigger_id" {
   description = "OCI DevOps GitHub trigger OCID"
   value       = var.create_devops_pipeline ? oci_devops_trigger.github_push_build[0].id : null
@@ -111,4 +126,9 @@ output "kubeconfig_path" {
 output "mlflow_url" {
   description = "Public URL for MLflow"
   value       = local.mlflow_host != "" ? "http://${local.mlflow_host}" : "LoadBalancer is still provisioning. Re-run: terraform output mlflow_url"
+}
+
+output "serving_url" {
+  description = "Command that waits for serving Service external endpoint and prints full URL."
+  value       = "bash -lc 'while true; do IP=$(kubectl -n ${var.serving_k8s_namespace} get svc ${var.serving_k8s_service_name} -o jsonpath=\"{.status.loadBalancer.ingress[0].ip}\" 2>/dev/null); HOST=$(kubectl -n ${var.serving_k8s_namespace} get svc ${var.serving_k8s_service_name} -o jsonpath=\"{.status.loadBalancer.ingress[0].hostname}\" 2>/dev/null); if [ -n \"$IP\" ]; then echo http://$IP; break; fi; if [ -n \"$HOST\" ]; then echo http://$HOST; break; fi; sleep 10; done'"
 }

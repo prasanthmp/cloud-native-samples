@@ -2,6 +2,7 @@ locals {
   devops_build_compartment_ocid_value         = var.devops_build_compartment_ocid != null ? var.devops_build_compartment_ocid : var.compartment_id
   devops_build_training_ocir_repository_value = var.create_ocir_training_repository ? var.ocir_training_repository_name : var.devops_build_ocir_repository
   devops_build_serving_ocir_repository_value  = var.create_ocir_serving_repository ? var.ocir_serving_repository_name : var.devops_build_serving_ocir_repository
+  devops_deploy_subnet_id_value               = var.devops_deploy_stage_subnet_id != null ? var.devops_deploy_stage_subnet_id : oci_core_subnet.datascience.id
 }
 
 resource "local_file" "devops_build_spec" {
@@ -17,6 +18,26 @@ resource "local_file" "devops_build_spec" {
     ocir_username               = var.devops_build_ocir_username != null ? var.devops_build_ocir_username : ""
     ocir_auth_token             = var.devops_build_ocir_auth_token != null ? var.devops_build_ocir_auth_token : ""
     ocir_auth_token_secret_ocid = var.devops_build_ocir_auth_token_secret_ocid != null ? var.devops_build_ocir_auth_token_secret_ocid : ""
+  })
+}
+
+resource "local_file" "devops_deploy_command_spec" {
+  count    = var.create_devops_pipeline && var.create_devops_deploy_pipeline ? 1 : 0
+  filename = "${path.module}/devops/deploy_command_spec.yaml"
+  content = templatefile("${path.module}/devops/deploy_command_spec.yaml.tftpl", {
+    region              = var.region
+    cluster_id          = oci_containerengine_cluster.oke.id
+    timeout_in_seconds  = var.devops_deploy_stage_timeout_in_seconds
+    serving_namespace   = var.serving_k8s_namespace
+    serving_deployment  = var.serving_k8s_deployment_name
+    serving_service     = var.serving_k8s_service_name
+    mlflow_tracking_uri = var.serving_mlflow_tracking_uri
+    mlflow_model_name   = var.serving_mlflow_model_name
+    mlflow_model_stage  = var.serving_mlflow_model_stage
+    ocir_region_code    = var.devops_build_ocir_region_code
+    ocir_namespace      = coalesce(var.devops_build_ocir_namespace, "")
+    ocir_repository     = local.devops_build_serving_ocir_repository_value
+    image_tag           = var.devops_build_image_tag
   })
 }
 
@@ -70,6 +91,72 @@ resource "oci_devops_build_pipeline" "mlflow_training" {
   description  = "Build pipeline for packaging training code and triggering Data Science job."
 }
 
+resource "oci_devops_deploy_pipeline" "serving" {
+  count        = var.create_devops_pipeline && var.create_devops_deploy_pipeline ? 1 : 0
+  project_id   = oci_devops_project.mlflow_training[0].id
+  display_name = var.devops_deploy_pipeline_name
+  description  = "Deploy pipeline to roll out latest MLflow serving image on OKE."
+}
+
+resource "oci_devops_deploy_artifact" "serving_command_spec" {
+  count                      = var.create_devops_pipeline && var.create_devops_deploy_pipeline ? 1 : 0
+  project_id                 = oci_devops_project.mlflow_training[0].id
+  display_name               = var.devops_deploy_command_artifact_name
+  argument_substitution_mode = "NONE"
+  deploy_artifact_type       = "COMMAND_SPEC"
+
+  deploy_artifact_source {
+    deploy_artifact_source_type = "INLINE"
+    base64encoded_content = base64encode(templatefile("${path.module}/devops/deploy_command_spec.yaml.tftpl", {
+      region              = var.region
+      cluster_id          = oci_containerengine_cluster.oke.id
+      timeout_in_seconds  = var.devops_deploy_stage_timeout_in_seconds
+      serving_namespace   = var.serving_k8s_namespace
+      serving_deployment  = var.serving_k8s_deployment_name
+      serving_service     = var.serving_k8s_service_name
+      mlflow_tracking_uri = var.serving_mlflow_tracking_uri
+      mlflow_model_name   = var.serving_mlflow_model_name
+      mlflow_model_stage  = var.serving_mlflow_model_stage
+      ocir_region_code    = var.devops_build_ocir_region_code
+      ocir_namespace      = coalesce(var.devops_build_ocir_namespace, "")
+      ocir_repository     = local.devops_build_serving_ocir_repository_value
+      image_tag           = var.devops_build_image_tag
+    }))
+  }
+}
+
+resource "oci_devops_deploy_stage" "deploy_serving_shell" {
+  count                           = var.create_devops_pipeline && var.create_devops_deploy_pipeline ? 1 : 0
+  deploy_pipeline_id              = oci_devops_deploy_pipeline.serving[0].id
+  display_name                    = var.devops_deploy_stage_name
+  deploy_stage_type               = "SHELL"
+  command_spec_deploy_artifact_id = oci_devops_deploy_artifact.serving_command_spec[0].id
+  timeout_in_seconds              = var.devops_deploy_stage_timeout_in_seconds
+
+  deploy_stage_predecessor_collection {
+    items {
+      id = oci_devops_deploy_pipeline.serving[0].id
+    }
+  }
+
+  container_config {
+    container_config_type = "CONTAINER_INSTANCE_CONFIG"
+    compartment_id        = var.compartment_id
+    availability_domain   = data.oci_identity_availability_domains.ads.availability_domains[0].name
+    shape_name            = var.devops_deploy_stage_shape_name
+
+    shape_config {
+      ocpus         = var.devops_deploy_stage_shape_ocpus
+      memory_in_gbs = var.devops_deploy_stage_shape_memory_in_gbs
+    }
+
+    network_channel {
+      network_channel_type = "SERVICE_VNIC_CHANNEL"
+      subnet_id            = local.devops_deploy_subnet_id_value
+    }
+  }
+}
+
 resource "oci_devops_build_pipeline_stage" "build_and_deploy" {
   count                     = var.create_devops_pipeline ? 1 : 0
   build_pipeline_id         = oci_devops_build_pipeline.mlflow_training[0].id
@@ -103,6 +190,21 @@ resource "oci_devops_build_pipeline_stage" "build_and_deploy" {
     precondition {
       condition     = try(trimspace(var.devops_repository_url) != "", false)
       error_message = "devops_repository_url is required when create_devops_pipeline=true."
+    }
+  }
+}
+
+resource "oci_devops_build_pipeline_stage" "trigger_serving_deploy" {
+  count                          = var.create_devops_pipeline && var.create_devops_deploy_pipeline ? 1 : 0
+  build_pipeline_id              = oci_devops_build_pipeline.mlflow_training[0].id
+  build_pipeline_stage_type      = "TRIGGER_DEPLOYMENT_PIPELINE"
+  display_name                   = var.devops_trigger_deploy_stage_name
+  deploy_pipeline_id             = oci_devops_deploy_pipeline.serving[0].id
+  is_pass_all_parameters_enabled = true
+
+  build_pipeline_stage_predecessor_collection {
+    items {
+      id = oci_devops_build_pipeline_stage.build_and_deploy[0].id
     }
   }
 }

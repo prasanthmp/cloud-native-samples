@@ -1,42 +1,105 @@
 version: 0.1
 component: command
-timeoutInSeconds: 3600
+timeoutInSeconds: ${timeout_in_seconds}
 shell: bash
-env:
-  variables:
-    COMPARTMENT_OCID: "${compartment_ocid}"
 steps:
   - type: Command
-    name: Trigger Data Science Job
+    name: Deploy mlflow-serving to OKE
     command: |
-      : "$${COMPARTMENT_OCID:?Set COMPARTMENT_OCID}"
-      JOB_OCID="$$(oci data-science job list \
-        --compartment-id "$${COMPARTMENT_OCID}" \
-        --lifecycle-state ACTIVE \
-        --query 'data[0].id' \
-        --raw-output)"
-      if [ -z "$${JOB_OCID}" ] || [ "$${JOB_OCID}" = "null" ]; then
-        echo "No ACTIVE Data Science Job found in compartment $${COMPARTMENT_OCID}."
-        exit 1
-      fi
-      PROJECT_OCID="$$(oci data-science job get \
-        --job-id "$${JOB_OCID}" \
-        --query 'data.\"project-id\"' \
-        --raw-output)"
-      DISPLAY_NAME="ml-training-run-$$(date +%Y%m%d-%H%M%S)"
-      echo "Executing command:"
-      echo "oci data-science job-run create \\"
-      echo "  --job-id \"$${JOB_OCID}\" \\"
-      echo "  --project-id \"$${PROJECT_OCID}\" \\"
-      echo "  --compartment-id \"$${COMPARTMENT_OCID}\" \\"
-      echo "  --display-name \"$${DISPLAY_NAME}\" \\"
-      echo "  --query 'data.id' \\"
-      echo "  --raw-output"
-      JOB_RUN_OCID="$$(oci data-science job-run create \
-        --job-id "$${JOB_OCID}" \
-        --project-id "$${PROJECT_OCID}" \
-        --compartment-id "$${COMPARTMENT_OCID}" \
-        --display-name "$${DISPLAY_NAME}" \
-        --query 'data.id' \
-        --raw-output)"
-      echo "Started OCI Data Science Job Run: $${JOB_RUN_OCID}"
+      set -euo pipefail
+
+      REGION="${region}"
+      CLUSTER_ID="${cluster_id}"
+      SERVING_NAMESPACE="${serving_namespace}"
+      SERVING_DEPLOYMENT="${serving_deployment}"
+      SERVING_SERVICE="${serving_service}"
+      MLFLOW_TRACKING_URI="${mlflow_tracking_uri}"
+      MLFLOW_MODEL_NAME="${mlflow_model_name}"
+      MLFLOW_MODEL_STAGE="${mlflow_model_stage}"
+      IMAGE_URI="${ocir_region_code}.ocir.io/${ocir_namespace}/${ocir_repository}:${image_tag}"
+
+      echo "Deploying serving image: $IMAGE_URI"
+
+      oci ce cluster create-kubeconfig \
+        --cluster-id "$CLUSTER_ID" \
+        --file /tmp/kubeconfig \
+        --region "$REGION" \
+        --token-version 2.0.0 \
+        --kube-endpoint PUBLIC_ENDPOINT
+
+      export KUBECONFIG=/tmp/kubeconfig
+
+      kubectl get namespace "$SERVING_NAMESPACE" >/dev/null 2>&1 || kubectl create namespace "$SERVING_NAMESPACE"
+
+      cat >/tmp/mlflow-serving-deployment.yaml <<EOF
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: $SERVING_DEPLOYMENT
+        namespace: $SERVING_NAMESPACE
+        labels:
+          app: mlflow-serving
+      spec:
+        replicas: 1
+        selector:
+          matchLabels:
+            app: mlflow-serving
+        template:
+          metadata:
+            labels:
+              app: mlflow-serving
+          spec:
+            containers:
+            - name: mlflow-serving
+              image: $IMAGE_URI
+              imagePullPolicy: Always
+              ports:
+              - containerPort: 8000
+              env:
+              - name: MLFLOW_TRACKING_URI
+                value: "$MLFLOW_TRACKING_URI"
+              - name: MLFLOW_MODEL_NAME
+                value: "$MLFLOW_MODEL_NAME"
+              - name: MLFLOW_MODEL_STAGE
+                value: "$MLFLOW_MODEL_STAGE"
+      EOF
+
+      cat >/tmp/mlflow-serving-service.yaml <<EOF
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: $SERVING_SERVICE
+        namespace: $SERVING_NAMESPACE
+      spec:
+        type: LoadBalancer
+        selector:
+          app: mlflow-serving
+        ports:
+        - name: http
+          port: 80
+          targetPort: 8000
+          protocol: TCP
+      EOF
+
+      kubectl apply -f /tmp/mlflow-serving-deployment.yaml
+      kubectl apply -f /tmp/mlflow-serving-service.yaml
+      kubectl -n "$SERVING_NAMESPACE" rollout status deployment/"$SERVING_DEPLOYMENT" --timeout=600s
+      kubectl -n "$SERVING_NAMESPACE" get svc "$SERVING_SERVICE" -o wide
+
+      echo "Waiting for external IP/hostname on service $SERVING_SERVICE..."
+      for i in $(seq 1 60); do
+        LB_IP="$(kubectl -n "$SERVING_NAMESPACE" get svc "$SERVING_SERVICE" -o jsonpath='{.status.loadBalancer.ingress[0].ip}' 2>/dev/null || true)"
+        LB_HOST="$(kubectl -n "$SERVING_NAMESPACE" get svc "$SERVING_SERVICE" -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' 2>/dev/null || true)"
+        if [ -n "$LB_IP" ]; then
+          echo "Serving URL: http://$LB_IP"
+          exit 0
+        fi
+        if [ -n "$LB_HOST" ]; then
+          echo "Serving URL: http://$LB_HOST"
+          exit 0
+        fi
+        sleep 10
+      done
+
+      echo "Service external endpoint is still provisioning. Check later with:"
+      echo "kubectl -n $SERVING_NAMESPACE get svc $SERVING_SERVICE -o wide"

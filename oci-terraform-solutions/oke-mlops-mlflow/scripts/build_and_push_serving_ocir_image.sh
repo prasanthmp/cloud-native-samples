@@ -12,7 +12,7 @@ if [ -z "${OCIR_AUTH_TOKEN:-}" ] && [ -n "${OCIR_AUTH_TOKEN_SECRET_OCID:-}" ]; t
     exit 1
   fi
   export OCI_CLI_AUTH="${OCI_CLI_AUTH:-resource_principal}"
-  TOKEN_B64="$(oci secrets secret-bundle get --secret-id "${OCIR_AUTH_TOKEN_SECRET_OCID}" --query 'data.\"secret-bundle-content\".content' --raw-output)"
+  TOKEN_B64="$(oci secrets secret-bundle get --secret-id "${OCIR_AUTH_TOKEN_SECRET_OCID}" --query 'data."secret-bundle-content".content' --raw-output)"
   OCIR_AUTH_TOKEN="$(printf '%s' "${TOKEN_B64}" | base64 --decode)"
   export OCIR_AUTH_TOKEN
 fi
