@@ -1,6 +1,7 @@
 locals {
-  devops_build_compartment_ocid_value = var.devops_build_compartment_ocid != null ? var.devops_build_compartment_ocid : var.compartment_id
-  devops_build_ocir_repository_value  = var.create_ocir_training_repository ? var.ocir_training_repository_name : var.devops_build_ocir_repository
+  devops_build_compartment_ocid_value         = var.devops_build_compartment_ocid != null ? var.devops_build_compartment_ocid : var.compartment_id
+  devops_build_training_ocir_repository_value = var.create_ocir_training_repository ? var.ocir_training_repository_name : var.devops_build_ocir_repository
+  devops_build_serving_ocir_repository_value  = var.create_ocir_serving_repository ? var.ocir_serving_repository_name : var.devops_build_serving_ocir_repository
 }
 
 resource "local_file" "devops_build_spec" {
@@ -10,7 +11,8 @@ resource "local_file" "devops_build_spec" {
     compartment_ocid            = local.devops_build_compartment_ocid_value
     ocir_region_code            = var.devops_build_ocir_region_code
     ocir_namespace              = coalesce(var.devops_build_ocir_namespace, "")
-    ocir_repository             = local.devops_build_ocir_repository_value
+    ocir_training_repository    = local.devops_build_training_ocir_repository_value
+    ocir_serving_repository     = local.devops_build_serving_ocir_repository_value
     image_tag                   = var.devops_build_image_tag
     ocir_username               = var.devops_build_ocir_username != null ? var.devops_build_ocir_username : ""
     ocir_auth_token             = var.devops_build_ocir_auth_token != null ? var.devops_build_ocir_auth_token : ""

@@ -186,7 +186,7 @@ Serving files are under `serving/`:
 
 - API: `serving/app.py`
 - Container: `serving/Dockerfile`
-- Build/push helper: `serving/build_and_push_ocir_image.sh`
+- Build/push helper: `scripts/build_and_push_serving_ocir_image.sh`
 - K8s manifests: `serving/k8s/deployment.yaml`, `serving/k8s/service.yaml`
 
 ### Build and Push Serving Image to OCIR
@@ -199,7 +199,7 @@ export IMAGE_TAG=latest
 export OCIR_USERNAME=<namespace>/<username>
 export OCIR_AUTH_TOKEN=<auth_token>
 
-bash serving/build_and_push_ocir_image.sh
+bash scripts/build_and_push_serving_ocir_image.sh
 ```
 
 ### Deploy Serving API to OKE

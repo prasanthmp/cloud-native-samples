@@ -293,8 +293,14 @@ variable "devops_build_ocir_namespace" {
 
 variable "devops_build_ocir_repository" {
   type        = string
-  description = "OCIR repository name passed into build_spec env."
+  description = "Training OCIR repository name passed into build_spec env."
   default     = "mlflow-training-test"
+}
+
+variable "devops_build_serving_ocir_repository" {
+  type        = string
+  description = "Serving OCIR repository name passed into build_spec env."
+  default     = "mlflow-serving"
 }
 
 variable "devops_build_image_tag" {
@@ -340,6 +346,25 @@ variable "ocir_training_repository_name" {
 variable "ocir_training_repository_compartment_id" {
   type        = string
   description = "Compartment OCID where the OCIR training repository is created. If null, uses var.compartment_id."
+  default     = null
+  nullable    = true
+}
+
+variable "create_ocir_serving_repository" {
+  type        = bool
+  description = "If true, creates the OCIR repository used for serving image pushes."
+  default     = true
+}
+
+variable "ocir_serving_repository_name" {
+  type        = string
+  description = "OCIR repository name to create for serving images."
+  default     = "mlflow-serving"
+}
+
+variable "ocir_serving_repository_compartment_id" {
+  type        = string
+  description = "Compartment OCID where the OCIR serving repository is created. If null, uses var.compartment_id."
   default     = null
   nullable    = true
 }

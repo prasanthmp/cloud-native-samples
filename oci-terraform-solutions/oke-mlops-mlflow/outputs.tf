@@ -45,7 +45,17 @@ output "ocir_training_repository_id" {
 
 output "ocir_training_repository_name" {
   description = "OCIR training repository name used by the build pipeline"
-  value       = local.devops_build_ocir_repository_value
+  value       = local.devops_build_training_ocir_repository_value
+}
+
+output "ocir_serving_repository_id" {
+  description = "OCIR serving repository OCID"
+  value       = var.create_ocir_serving_repository ? oci_artifacts_container_repository.serving[0].id : null
+}
+
+output "ocir_serving_repository_name" {
+  description = "OCIR serving repository name used by the build pipeline"
+  value       = local.devops_build_serving_ocir_repository_value
 }
 
 output "devops_project_id" {
