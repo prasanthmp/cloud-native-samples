@@ -114,9 +114,9 @@ The script logs:
 - model artifact
 - model registration (MLflow Model Registry)
 
-### 4) Deploy Step (Deployment Pipeline Shell Stage)
+### 4) Data Science Trigger Stage (Build Pipeline)
 
-The build pipeline now handles only build/package. A trigger stage starts the DevOps deployment pipeline, and a shell deploy stage triggers the Data Science Job Run.
+The pipeline uses a second OCI DevOps build stage after the primary build stage to trigger the Data Science Job Run.
 
 ### 5) Trigger Flow
 
@@ -124,8 +124,8 @@ Recommended trigger chain:
 
 1. Dev pushes code to GitHub
 2. OCI DevOps Build Pipeline is triggered
-3. Build pipeline trigger stage starts DevOps deployment pipeline
-4. Deployment pipeline shell stage triggers Data Science Job Run
+3. Primary build stage builds/packages training artifacts
+4. Next build stage triggers Data Science Job Run
 5. Job runs training and logs to MLflow + registers model
 
 ## Optional Terraform Resources For Pipeline

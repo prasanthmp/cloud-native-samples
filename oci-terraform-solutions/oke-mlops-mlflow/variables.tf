@@ -344,46 +344,16 @@ variable "ocir_training_repository_compartment_id" {
   nullable    = true
 }
 
-variable "devops_deploy_pipeline_name" {
+variable "devops_trigger_datascience_build_stage_name" {
   type        = string
-  description = "OCI DevOps deployment pipeline display name"
-  default     = "mlflow-training-deploy-pipeline"
-}
-
-variable "devops_trigger_deployment_stage_name" {
-  type        = string
-  description = "OCI DevOps build stage display name that triggers the deployment pipeline"
-  default     = "trigger-training-deploy-pipeline"
-}
-
-variable "devops_shell_deploy_stage_name" {
-  type        = string
-  description = "OCI DevOps deployment shell stage display name"
+  description = "OCI DevOps build stage display name that triggers the Data Science job"
   default     = "trigger-datascience-job"
 }
 
-variable "devops_shell_deploy_stage_timeout_seconds" {
-  type        = number
-  description = "Timeout in seconds for OCI DevOps shell deploy stage execution"
-  default     = 3600
-}
-
-variable "devops_shell_stage_shape" {
+variable "devops_trigger_datascience_build_spec_file_path" {
   type        = string
-  description = "Container instance shape used by OCI DevOps shell deploy stage"
-  default     = "CI.Standard.E4.Flex"
-}
-
-variable "devops_shell_stage_ocpus" {
-  type        = number
-  description = "OCPUs for OCI DevOps shell deploy stage container instance shape config"
-  default     = 1
-}
-
-variable "devops_shell_stage_memory_gb" {
-  type        = number
-  description = "Memory in GB for OCI DevOps shell deploy stage container instance shape config"
-  default     = 2
+  description = "Path to OCI DevOps build spec file for Data Science trigger stage in the source repository"
+  default     = "devops/build_spec_trigger_job.yaml"
 }
 
 variable "datascience_subnet_id" {

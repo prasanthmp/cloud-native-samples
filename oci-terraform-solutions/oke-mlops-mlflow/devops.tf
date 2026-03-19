@@ -18,8 +18,9 @@ resource "local_file" "devops_build_spec" {
 }
 
 resource "local_file" "devops_deploy_command_spec" {
-  filename = "${path.module}/devops/deploy_command_spec.yaml"
-  content = templatefile("${path.module}/devops/deploy_command_spec.yaml.tftpl", {
+  filename = "${path.module}/devops/build_spec_trigger_job.yaml"
+  content = templatefile("${path.module}/devops/build_spec_trigger_job.yaml.tftpl", {
+    project_root     = var.devops_project_root
     compartment_ocid = local.devops_build_compartment_ocid_value
   })
 }
@@ -74,57 +75,6 @@ resource "oci_devops_build_pipeline" "mlflow_training" {
   description  = "Build pipeline for packaging training code and triggering Data Science job."
 }
 
-resource "oci_devops_deploy_pipeline" "mlflow_training" {
-  count        = var.create_devops_pipeline ? 1 : 0
-  project_id   = oci_devops_project.mlflow_training[0].id
-  display_name = var.devops_deploy_pipeline_name
-  description  = "Deployment pipeline that triggers the OCI Data Science training job."
-}
-
-resource "oci_devops_deploy_artifact" "trigger_training_job_command_spec" {
-  count                      = var.create_devops_pipeline ? 1 : 0
-  project_id                 = oci_devops_project.mlflow_training[0].id
-  display_name               = "trigger-training-job-command-spec"
-  argument_substitution_mode = "NONE"
-  deploy_artifact_type       = "COMMAND_SPEC"
-
-  deploy_artifact_source {
-    deploy_artifact_source_type = "INLINE"
-    base64encoded_content       = base64encode(local_file.devops_deploy_command_spec.content)
-  }
-}
-
-resource "oci_devops_deploy_stage" "trigger_datascience_job" {
-  count                           = var.create_devops_pipeline ? 1 : 0
-  deploy_pipeline_id              = oci_devops_deploy_pipeline.mlflow_training[0].id
-  deploy_stage_type               = "SHELL"
-  display_name                    = var.devops_shell_deploy_stage_name
-  timeout_in_seconds              = var.devops_shell_deploy_stage_timeout_seconds
-  command_spec_deploy_artifact_id = oci_devops_deploy_artifact.trigger_training_job_command_spec[0].id
-
-  deploy_stage_predecessor_collection {
-    items {
-      id = oci_devops_deploy_pipeline.mlflow_training[0].id
-    }
-  }
-
-  container_config {
-    container_config_type = "CONTAINER_INSTANCE_CONFIG"
-    compartment_id        = var.compartment_id
-    shape_name            = var.devops_shell_stage_shape
-
-    shape_config {
-      ocpus         = var.devops_shell_stage_ocpus
-      memory_in_gbs = var.devops_shell_stage_memory_gb
-    }
-
-    network_channel {
-      network_channel_type = "SERVICE_VNIC_CHANNEL"
-      subnet_id            = local.datascience_subnet_id
-    }
-  }
-}
-
 resource "oci_devops_build_pipeline_stage" "build_and_deploy" {
   count                     = var.create_devops_pipeline ? 1 : 0
   build_pipeline_id         = oci_devops_build_pipeline.mlflow_training[0].id
@@ -162,17 +112,28 @@ resource "oci_devops_build_pipeline_stage" "build_and_deploy" {
   }
 }
 
-resource "oci_devops_build_pipeline_stage" "trigger_deploy_pipeline" {
-  count                          = var.create_devops_pipeline ? 1 : 0
-  build_pipeline_id              = oci_devops_build_pipeline.mlflow_training[0].id
-  build_pipeline_stage_type      = "TRIGGER_DEPLOYMENT_PIPELINE"
-  display_name                   = var.devops_trigger_deployment_stage_name
-  deploy_pipeline_id             = oci_devops_deploy_pipeline.mlflow_training[0].id
-  is_pass_all_parameters_enabled = true
+resource "oci_devops_build_pipeline_stage" "trigger_datascience_job" {
+  count                     = var.create_devops_pipeline ? 1 : 0
+  build_pipeline_id         = oci_devops_build_pipeline.mlflow_training[0].id
+  build_pipeline_stage_type = "BUILD"
+  display_name              = var.devops_trigger_datascience_build_stage_name
+  build_spec_file           = var.devops_trigger_datascience_build_spec_file_path
+  image                     = var.devops_build_stage_image
+  primary_build_source      = "github_source"
 
   build_pipeline_stage_predecessor_collection {
     items {
       id = oci_devops_build_pipeline_stage.build_and_deploy[0].id
+    }
+  }
+
+  build_source_collection {
+    items {
+      name            = "github_source"
+      connection_type = "GITHUB"
+      connection_id   = local.effective_devops_github_connection_id
+      repository_url  = var.devops_repository_url
+      branch          = var.devops_repository_branch
     }
   }
 }
