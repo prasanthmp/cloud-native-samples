@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mlflow-serving
+  namespace: mlflow
+  labels:
+    app: mlflow-serving
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mlflow-serving
+  template:
+    metadata:
+      labels:
+        app: mlflow-serving
+    spec:
+      containers:
+        - name: mlflow-serving
+          image: iad.ocir.io/<namespace>/mlflow-serving:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8000
+          env:
+            - name: MLFLOW_TRACKING_URI
+              value: "http://129.80.216.101"
+            - name: MLFLOW_MODEL_NAME
+              value: "iris-logreg-model"
+            - name: MLFLOW_MODEL_STAGE
+              value: "Production"

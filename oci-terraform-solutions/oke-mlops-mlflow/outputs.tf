@@ -38,6 +38,16 @@ output "datascience_job_id" {
   value       = var.create_datascience_job ? oci_datascience_job.training[0].id : null
 }
 
+output "ocir_training_repository_id" {
+  description = "OCIR training repository OCID"
+  value       = var.create_ocir_training_repository ? oci_artifacts_container_repository.training[0].id : null
+}
+
+output "ocir_training_repository_name" {
+  description = "OCIR training repository name used by the build pipeline"
+  value       = local.devops_build_ocir_repository_value
+}
+
 output "devops_project_id" {
   description = "OCI DevOps project OCID"
   value       = local.devops_project_enabled ? oci_devops_project.mlflow_training[0].id : null

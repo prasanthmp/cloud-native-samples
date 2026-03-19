@@ -119,6 +119,12 @@ variable "datascience_job_name" {
   default     = "mlflow-training-job"
 }
 
+variable "datascience_job_delete_related_job_runs" {
+  type        = bool
+  description = "If true, allows deleting related job runs when Terraform replaces/deletes the Data Science job."
+  default     = true
+}
+
 variable "datascience_job_container_image" {
   type        = string
   description = "Container image for OCI Data Science Job (OCIR image recommended)"
@@ -279,6 +285,13 @@ variable "devops_build_compartment_ocid" {
   nullable    = true
 }
 
+variable "devops_build_project_ocid" {
+  type        = string
+  description = "Data Science project OCID passed into build_spec env (PROJECT_OCID). If null, uses the resolved Data Science project ID."
+  default     = null
+  nullable    = true
+}
+
 variable "devops_build_ocir_region_code" {
   type        = string
   description = "OCIR region code passed into build_spec env (for example: iad)."
@@ -295,7 +308,7 @@ variable "devops_build_ocir_namespace" {
 variable "devops_build_ocir_repository" {
   type        = string
   description = "OCIR repository name passed into build_spec env."
-  default     = "mlflow-training"
+  default     = "mlflow-training-test"
 }
 
 variable "devops_build_image_tag" {
@@ -322,6 +335,25 @@ variable "devops_build_ocir_auth_token" {
 variable "devops_build_ocir_auth_token_secret_ocid" {
   type        = string
   description = "OCI Vault secret OCID containing OCIR auth token. Build script can fetch and decode this secret at runtime when OCIR_AUTH_TOKEN is empty."
+  default     = null
+  nullable    = true
+}
+
+variable "create_ocir_training_repository" {
+  type        = bool
+  description = "If true, creates the OCIR repository used for training image pushes."
+  default     = true
+}
+
+variable "ocir_training_repository_name" {
+  type        = string
+  description = "OCIR repository name to create for training images."
+  default     = "mlflow-training-test"
+}
+
+variable "ocir_training_repository_compartment_id" {
+  type        = string
+  description = "Compartment OCID where the OCIR training repository is created. If null, uses var.compartment_id."
   default     = null
   nullable    = true
 }

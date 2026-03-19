@@ -19,7 +19,6 @@ JOB_RUN_OCID=$(oci data-science job-run create \
   --project-id "${PROJECT_OCID}" \
   --compartment-id "${COMPARTMENT_OCID}" \
   --display-name "${DISPLAY_NAME}" \
-  --query 'data.id' \
   --raw-output)
 
 echo "Started OCI Data Science Job Run: ${JOB_RUN_OCID}"

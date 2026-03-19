@@ -83,6 +83,9 @@ Set these build variables/secrets in OCI DevOps:
 
 This Terraform stack can also render `devops/build_spec.yaml` from tfvars values (OCIR and job settings) using `devops/build_spec.yaml.tftpl`.
 For OCIR auth, you can pass either a direct token value or a Vault secret OCID (`devops_build_ocir_auth_token_secret_ocid`) that the build script resolves via OCI CLI.
+It can also create the OCIR training repository with:
+- `create_ocir_training_repository = true`
+- `ocir_training_repository_name = "mlflow-training-test"`
 
 ### 3) OCI Data Science Job
 
@@ -184,4 +187,45 @@ mlflow.set_experiment("oke-smoke-test")
 with mlflow.start_run():
     mlflow.log_param("source", "oci-datascience-notebook")
     mlflow.log_metric("accuracy", 0.99)
+```
+
+## Model Serving (FastAPI on OKE)
+
+Serving files are under `serving/`:
+
+- API: `serving/app.py`
+- Container: `serving/Dockerfile`
+- Build/push helper: `serving/build_and_push_ocir_image.sh`
+- K8s manifests: `serving/k8s/deployment.yaml`, `serving/k8s/service.yaml`
+
+### Build and Push Serving Image to OCIR
+
+```bash
+export OCIR_REGION_CODE=iad
+export OCIR_NAMESPACE=<namespace>
+export OCIR_REPOSITORY=mlflow-serving
+export IMAGE_TAG=latest
+export OCIR_USERNAME=<namespace>/<username>
+export OCIR_AUTH_TOKEN=<auth_token>
+
+bash serving/build_and_push_ocir_image.sh
+```
+
+### Deploy Serving API to OKE
+
+1. Update `serving/k8s/deployment.yaml` image field and env values.
+2. Apply manifests:
+
+```bash
+kubectl apply -f serving/k8s/deployment.yaml
+kubectl apply -f serving/k8s/service.yaml
+```
+
+3. Test:
+
+```bash
+kubectl -n mlflow get svc mlflow-serving
+curl -X POST http://<serving-lb-ip>/predict \
+  -H "Content-Type: application/json" \
+  -d '{"inputs":[[5.1,3.5,1.4,0.2]]}'
 ```

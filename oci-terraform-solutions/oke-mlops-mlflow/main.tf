@@ -280,7 +280,17 @@ locals {
   devops_build_job_ocid_value = var.devops_build_job_ocid != null ? var.devops_build_job_ocid : (
     var.create_datascience_job ? oci_datascience_job.training[0].id : ""
   )
-  devops_build_compartment_ocid_value = var.devops_build_compartment_ocid != null ? var.devops_build_compartment_ocid : var.compartment_id
+  devops_build_compartment_ocid_value           = var.devops_build_compartment_ocid != null ? var.devops_build_compartment_ocid : var.compartment_id
+  devops_build_project_ocid_value               = var.devops_build_project_ocid != null ? var.devops_build_project_ocid : (local.datascience_project_id != null ? local.datascience_project_id : "")
+  ocir_training_repository_compartment_id_value = var.ocir_training_repository_compartment_id != null ? var.ocir_training_repository_compartment_id : var.compartment_id
+  devops_build_ocir_repository_value            = var.create_ocir_training_repository ? var.ocir_training_repository_name : var.devops_build_ocir_repository
+}
+
+resource "oci_artifacts_container_repository" "training" {
+  count          = var.create_ocir_training_repository ? 1 : 0
+  compartment_id = local.ocir_training_repository_compartment_id_value
+  display_name   = var.ocir_training_repository_name
+  is_public      = false
 }
 
 resource "oci_datascience_project" "mlflow_test" {
@@ -304,10 +314,11 @@ resource "oci_datascience_notebook_session" "mlflow_test" {
 }
 
 resource "oci_datascience_job" "training" {
-  count          = var.create_datascience_job ? 1 : 0
-  compartment_id = var.compartment_id
-  project_id     = local.datascience_project_id
-  display_name   = var.datascience_job_name
+  count                   = var.create_datascience_job ? 1 : 0
+  compartment_id          = var.compartment_id
+  project_id              = local.datascience_project_id
+  display_name            = var.datascience_job_name
+  delete_related_job_runs = var.datascience_job_delete_related_job_runs
 
   job_configuration_details {
     job_type               = "DEFAULT"
@@ -339,9 +350,10 @@ resource "local_file" "devops_build_spec" {
     project_root                = var.devops_project_root
     job_ocid                    = local.devops_build_job_ocid_value
     compartment_ocid            = local.devops_build_compartment_ocid_value
+    project_ocid                = local.devops_build_project_ocid_value
     ocir_region_code            = var.devops_build_ocir_region_code
     ocir_namespace              = coalesce(var.devops_build_ocir_namespace, "")
-    ocir_repository             = var.devops_build_ocir_repository
+    ocir_repository             = local.devops_build_ocir_repository_value
     image_tag                   = var.devops_build_image_tag
     ocir_username               = var.devops_build_ocir_username != null ? var.devops_build_ocir_username : ""
     ocir_auth_token             = var.devops_build_ocir_auth_token != null ? var.devops_build_ocir_auth_token : ""

@@ -9,9 +9,10 @@ env:
     PACKAGE_NAME: training_bundle.zip
     JOB_OCID: "ocid1.datasciencejob.oc1.iad.amaaaaaak6zxdwaayscvo4j5tjdo7bseqgxbs5k4ffpwqx5g64jatdhoznja"
     COMPARTMENT_OCID: "ocid1.compartment.oc1..aaaaaaaakudebt2qkiq7rigx53xbsanwjxzr42tw46ktdmyejwotqsclgo6q"
+    PROJECT_OCID: "ocid1.datascienceproject.oc1.iad.amaaaaaak6zxdwaakkgzcymsvyx6776nw5uzbwzt5m55jtrr6cdjuvkxmula"
     OCIR_REGION_CODE: "iad"
     OCIR_NAMESPACE: "idxlfhtrvfsa"
-    OCIR_REPOSITORY: "mlflow-training"
+    OCIR_REPOSITORY: "mlflow-training-test"
     IMAGE_TAG: "latest"
     OCIR_USERNAME: "idxlfhtrvfsa/prasanth.prasad@oracle.com"
     OCIR_AUTH_TOKEN: ""
