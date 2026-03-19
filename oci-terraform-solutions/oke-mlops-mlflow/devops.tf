@@ -7,6 +7,7 @@ resource "local_file" "devops_build_spec" {
   filename = "${path.module}/devops/build_spec.yaml"
   content = templatefile("${path.module}/devops/build_spec.yaml.tftpl", {
     project_root                = var.devops_project_root
+    compartment_ocid            = local.devops_build_compartment_ocid_value
     ocir_region_code            = var.devops_build_ocir_region_code
     ocir_namespace              = coalesce(var.devops_build_ocir_namespace, "")
     ocir_repository             = local.devops_build_ocir_repository_value
@@ -14,14 +15,6 @@ resource "local_file" "devops_build_spec" {
     ocir_username               = var.devops_build_ocir_username != null ? var.devops_build_ocir_username : ""
     ocir_auth_token             = var.devops_build_ocir_auth_token != null ? var.devops_build_ocir_auth_token : ""
     ocir_auth_token_secret_ocid = var.devops_build_ocir_auth_token_secret_ocid != null ? var.devops_build_ocir_auth_token_secret_ocid : ""
-  })
-}
-
-resource "local_file" "devops_deploy_command_spec" {
-  filename = "${path.module}/devops/build_spec_trigger_job.yaml"
-  content = templatefile("${path.module}/devops/build_spec_trigger_job.yaml.tftpl", {
-    project_root     = var.devops_project_root
-    compartment_ocid = local.devops_build_compartment_ocid_value
   })
 }
 
@@ -112,31 +105,6 @@ resource "oci_devops_build_pipeline_stage" "build_and_deploy" {
   }
 }
 
-resource "oci_devops_build_pipeline_stage" "trigger_datascience_job" {
-  count                     = var.create_devops_pipeline ? 1 : 0
-  build_pipeline_id         = oci_devops_build_pipeline.mlflow_training[0].id
-  build_pipeline_stage_type = "BUILD"
-  display_name              = var.devops_trigger_datascience_build_stage_name
-  build_spec_file           = var.devops_trigger_datascience_build_spec_file_path
-  image                     = var.devops_build_stage_image
-  primary_build_source      = "github_source"
-
-  build_pipeline_stage_predecessor_collection {
-    items {
-      id = oci_devops_build_pipeline_stage.build_and_deploy[0].id
-    }
-  }
-
-  build_source_collection {
-    items {
-      name            = "github_source"
-      connection_type = "GITHUB"
-      connection_id   = local.effective_devops_github_connection_id
-      repository_url  = var.devops_repository_url
-      branch          = var.devops_repository_branch
-    }
-  }
-}
 
 resource "oci_devops_trigger" "github_push_build" {
   count          = var.create_devops_pipeline ? 1 : 0

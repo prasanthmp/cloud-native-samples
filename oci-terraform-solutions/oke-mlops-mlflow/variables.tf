@@ -344,18 +344,6 @@ variable "ocir_training_repository_compartment_id" {
   nullable    = true
 }
 
-variable "devops_trigger_datascience_build_stage_name" {
-  type        = string
-  description = "OCI DevOps build stage display name that triggers the Data Science job"
-  default     = "trigger-datascience-job"
-}
-
-variable "devops_trigger_datascience_build_spec_file_path" {
-  type        = string
-  description = "Path to OCI DevOps build spec file for Data Science trigger stage in the source repository"
-  default     = "devops/build_spec_trigger_job.yaml"
-}
-
 variable "datascience_subnet_id" {
   type        = string
   description = "Optional subnet OCID for Data Science notebook session. If null, uses the Terraform-created private Data Science subnet."

@@ -7,6 +7,7 @@ env:
     PROJECT_ROOT: "${project_root}"
     PACKAGE_DIR: dist
     PACKAGE_NAME: training_bundle.zip
+    COMPARTMENT_OCID: "${compartment_ocid}"
     OCIR_REGION_CODE: "${ocir_region_code}"
     OCIR_NAMESPACE: "${ocir_namespace}"
     OCIR_REPOSITORY: "${ocir_repository}"
@@ -52,6 +53,18 @@ steps:
       mkdir -p $${PACKAGE_DIR}
       zip -r $${PACKAGE_DIR}/$${PACKAGE_NAME} training scripts
       ls -lah $${PACKAGE_DIR}
+  - type: Command
+    name: Trigger Data Science Job
+    command: |
+      if [ -d "$${OCI_PRIMARY_SOURCE_DIR}/$${PROJECT_ROOT}/training" ]; then
+        cd "$${OCI_PRIMARY_SOURCE_DIR}/$${PROJECT_ROOT}"
+      elif [ -d "$${OCI_PRIMARY_SOURCE_DIR}/training" ]; then
+        cd "$${OCI_PRIMARY_SOURCE_DIR}"
+      else
+        echo "training/ directory not found from OCI_PRIMARY_SOURCE_DIR=$${OCI_PRIMARY_SOURCE_DIR}"
+        exit 1
+      fi
+      bash scripts/trigger_datascience_job_run.sh
 outputArtifacts:
   - name: training_bundle
     type: BINARY
