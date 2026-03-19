@@ -275,11 +275,8 @@ resource "oci_containerengine_node_pool" "default" {
 }
 
 locals {
-  datascience_subnet_id  = var.datascience_subnet_id != null ? var.datascience_subnet_id : oci_core_subnet.datascience.id
-  datascience_project_id = var.create_datascience_notebook ? oci_datascience_project.mlflow_test[0].id : var.existing_datascience_project_id
-  devops_build_job_ocid_value = var.devops_build_job_ocid != null ? var.devops_build_job_ocid : (
-    var.create_datascience_job ? oci_datascience_job.training[0].id : ""
-  )
+  datascience_subnet_id                         = var.datascience_subnet_id != null ? var.datascience_subnet_id : oci_core_subnet.datascience.id
+  datascience_project_id                        = var.create_datascience_notebook ? oci_datascience_project.mlflow_test[0].id : var.existing_datascience_project_id
   devops_build_compartment_ocid_value           = var.devops_build_compartment_ocid != null ? var.devops_build_compartment_ocid : var.compartment_id
   devops_build_project_ocid_value               = var.devops_build_project_ocid != null ? var.devops_build_project_ocid : (local.datascience_project_id != null ? local.datascience_project_id : "")
   ocir_training_repository_compartment_id_value = var.ocir_training_repository_compartment_id != null ? var.ocir_training_repository_compartment_id : var.compartment_id
@@ -348,7 +345,6 @@ resource "local_file" "devops_build_spec" {
   filename = "${path.module}/devops/build_spec.yaml"
   content = templatefile("${path.module}/devops/build_spec.yaml.tftpl", {
     project_root                = var.devops_project_root
-    job_ocid                    = local.devops_build_job_ocid_value
     compartment_ocid            = local.devops_build_compartment_ocid_value
     project_ocid                = local.devops_build_project_ocid_value
     ocir_region_code            = var.devops_build_ocir_region_code

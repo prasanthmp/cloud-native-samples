@@ -7,9 +7,7 @@ env:
     PROJECT_ROOT: "oci-terraform-solutions/oke-mlops-mlflow"
     PACKAGE_DIR: dist
     PACKAGE_NAME: training_bundle.zip
-    JOB_OCID: "ocid1.datasciencejob.oc1.iad.amaaaaaak6zxdwaayscvo4j5tjdo7bseqgxbs5k4ffpwqx5g64jatdhoznja"
     COMPARTMENT_OCID: "ocid1.compartment.oc1..aaaaaaaakudebt2qkiq7rigx53xbsanwjxzr42tw46ktdmyejwotqsclgo6q"
-    PROJECT_OCID: "ocid1.datascienceproject.oc1.iad.amaaaaaak6zxdwaakkgzcymsvyx6776nw5uzbwzt5m55jtrr6cdjuvkxmula"
     OCIR_REGION_CODE: "iad"
     OCIR_NAMESPACE: "idxlfhtrvfsa"
     OCIR_REPOSITORY: "mlflow-training-test"
@@ -63,10 +61,10 @@ steps:
       else
         cd "${OCI_PRIMARY_SOURCE_DIR}"
       fi
-      if [ -n "${JOB_OCID}" ] && [ -n "${COMPARTMENT_OCID}" ]; then
+      if [ -n "${COMPARTMENT_OCID}" ]; then
         bash scripts/trigger_datascience_job_run.sh
       else
-        echo "JOB_OCID or COMPARTMENT_OCID not set. Skipping Data Science Job trigger."
+        echo "COMPARTMENT_OCID not set. Skipping Data Science Job trigger."
       fi
 outputArtifacts:
   - name: training_bundle

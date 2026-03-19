@@ -124,8 +124,8 @@ bash scripts/trigger_datascience_job_run.sh
 
 Provide environment variables to the build stage:
 
-- `JOB_OCID=<your_datascience_job_ocid>`
 - `COMPARTMENT_OCID=<your_compartment_ocid>`
+- optional `JOB_OCID=<your_datascience_job_ocid>` (if not set, script auto-selects first `ACTIVE` job in the compartment)
 - optional `DISPLAY_NAME=<job_run_name>`
 
 ### 5) Trigger Flow

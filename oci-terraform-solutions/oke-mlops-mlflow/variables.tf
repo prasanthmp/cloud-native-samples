@@ -271,13 +271,6 @@ variable "devops_project_root" {
   default     = "oci-terraform-solutions/oke-mlops-mlflow"
 }
 
-variable "devops_build_job_ocid" {
-  type        = string
-  description = "Data Science Job OCID to pass into build_spec env (JOB_OCID). If null and create_datascience_job=true, Terraform uses the created job OCID."
-  default     = null
-  nullable    = true
-}
-
 variable "devops_build_compartment_ocid" {
   type        = string
   description = "Compartment OCID passed into build_spec env (COMPARTMENT_OCID). If null, uses var.compartment_id."

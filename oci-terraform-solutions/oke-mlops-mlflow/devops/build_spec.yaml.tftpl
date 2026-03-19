@@ -7,9 +7,7 @@ env:
     PROJECT_ROOT: "${project_root}"
     PACKAGE_DIR: dist
     PACKAGE_NAME: training_bundle.zip
-    JOB_OCID: "${job_ocid}"
     COMPARTMENT_OCID: "${compartment_ocid}"
-    PROJECT_OCID: "${project_ocid}"
     OCIR_REGION_CODE: "${ocir_region_code}"
     OCIR_NAMESPACE: "${ocir_namespace}"
     OCIR_REPOSITORY: "${ocir_repository}"
@@ -63,10 +61,10 @@ steps:
       else
         cd "$${OCI_PRIMARY_SOURCE_DIR}"
       fi
-      if [ -n "$${JOB_OCID}" ] && [ -n "$${COMPARTMENT_OCID}" ]; then
+      if [ -n "$${COMPARTMENT_OCID}" ]; then
         bash scripts/trigger_datascience_job_run.sh
       else
-        echo "JOB_OCID or COMPARTMENT_OCID not set. Skipping Data Science Job trigger."
+        echo "COMPARTMENT_OCID not set. Skipping Data Science Job trigger."
       fi
 outputArtifacts:
   - name: training_bundle
