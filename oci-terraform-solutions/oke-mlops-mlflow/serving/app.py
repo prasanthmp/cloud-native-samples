@@ -1,5 +1,6 @@
 import os
 from typing import Any
+import logging
 
 import mlflow
 import pandas as pd
@@ -11,6 +12,7 @@ from pydantic import BaseModel, Field
 MLFLOW_TRACKING_URI = os.getenv("MLFLOW_TRACKING_URI", "http://129.80.216.101")
 MODEL_NAME = os.getenv("MLFLOW_MODEL_NAME", "iris-logreg-model")
 MODEL_STAGE = os.getenv("MLFLOW_MODEL_STAGE", "Production")
+logger = logging.getLogger(__name__)
 
 
 class PredictRequest(BaseModel):
@@ -30,10 +32,20 @@ def load_latest_production_model() -> tuple[Any, str]:
     client = MlflowClient()
 
     versions = client.get_latest_versions(MODEL_NAME, stages=[MODEL_STAGE])
-    if not versions:
-        raise RuntimeError(f"No model versions found in stage '{MODEL_STAGE}' for model '{MODEL_NAME}'")
+    if versions:
+        latest = max(versions, key=lambda v: int(v.version))
+    else:
+        all_versions = list(client.search_model_versions(f"name='{MODEL_NAME}'"))
+        if not all_versions:
+            raise RuntimeError(f"No versions found for model '{MODEL_NAME}'")
+        latest = max(all_versions, key=lambda v: int(v.version))
+        logger.warning(
+            "No versions in stage '%s' for model '%s'. Falling back to latest version: %s",
+            MODEL_STAGE,
+            MODEL_NAME,
+            latest.version,
+        )
 
-    latest = max(versions, key=lambda v: int(v.version))
     model_uri = f"models:/{MODEL_NAME}/{latest.version}"
     model = mlflow.pyfunc.load_model(model_uri)
     return model, model_uri
@@ -46,9 +58,14 @@ app.state.model_uri = None
 
 @app.on_event("startup")
 def startup_event() -> None:
-    model, model_uri = load_latest_production_model()
-    app.state.model = model
-    app.state.model_uri = model_uri
+    try:
+        model, model_uri = load_latest_production_model()
+        app.state.model = model
+        app.state.model_uri = model_uri
+    except Exception:
+        logger.exception("Model load failed during startup. Service will start but /predict returns 503 until model is available.")
+        app.state.model = None
+        app.state.model_uri = None
 
 
 @app.get("/health")
@@ -77,4 +94,3 @@ def predict(request: PredictRequest) -> PredictResponse:
         model_uri=app.state.model_uri,
         predictions=[p.item() if hasattr(p, "item") else p for p in predictions],
     )
-
