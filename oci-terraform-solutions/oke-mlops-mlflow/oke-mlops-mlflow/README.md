@@ -81,9 +81,6 @@ Set these build variables/secrets in OCI DevOps:
 - `OCIR_USERNAME` (format: `<namespace>/<username>`)
 - `OCIR_AUTH_TOKEN` (auth token, secret variable)
 
-This Terraform stack can also render `devops/build_spec.yaml` from tfvars values (OCIR and job settings) using `devops/build_spec.yaml.tftpl`.
-For OCIR auth, you can pass either a direct token value or a Vault secret OCID (`devops_build_ocir_auth_token_secret_ocid`) that the build script resolves via OCI CLI.
-
 ### 3) OCI Data Science Job
 
 Create an OCI Data Science Job (once) that runs:
@@ -141,7 +138,6 @@ You can provision the pipeline resources from Terraform by setting:
 - `create_datascience_job = true`
 - `create_devops_pipeline = true`
 - `devops_repository_url`
-- optional `devops_trigger_file_paths` to trigger only on selected folders/files
 
 For GitHub connection, choose one:
 

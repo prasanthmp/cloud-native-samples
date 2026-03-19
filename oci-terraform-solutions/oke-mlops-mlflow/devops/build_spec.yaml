@@ -7,14 +7,15 @@ env:
     PROJECT_ROOT: "oci-terraform-solutions/oke-mlops-mlflow"
     PACKAGE_DIR: dist
     PACKAGE_NAME: training_bundle.zip
-    JOB_OCID: ""
-    COMPARTMENT_OCID: ""
+    JOB_OCID: "ocid1.datasciencejob.oc1.iad.<your_job_ocid>"
+    COMPARTMENT_OCID: "ocid1.compartment.oc1..aaaaaaaakudebt2qkiq7rigx53xbsanwjxzr42tw46ktdmyejwotqsclgo6q"
     OCIR_REGION_CODE: "iad"
-    OCIR_NAMESPACE: ""
+    OCIR_NAMESPACE: "idxlfhtrvfsa"
     OCIR_REPOSITORY: "mlflow-training"
     IMAGE_TAG: "latest"
-    OCIR_USERNAME: ""
+    OCIR_USERNAME: "idxlfhtrvfsa/prasanth.prasad@oracle.com"
     OCIR_AUTH_TOKEN: ""
+    OCIR_AUTH_TOKEN_SECRET_OCID: "ocid1.vaultsecret.oc1.iad.amaaaaaak6zxdwaayveuyoez3pu6g5vypoewcqs637w53w375oeavdtcccya"
 steps:
   - type: Command
     name: Install dependencies
@@ -36,10 +37,10 @@ steps:
       else
         cd "${OCI_PRIMARY_SOURCE_DIR}"
       fi
-      if [ -n "${OCIR_NAMESPACE}" ] && [ -n "${OCIR_USERNAME}" ] && [ -n "${OCIR_AUTH_TOKEN}" ]; then
+      if [ -n "${OCIR_NAMESPACE}" ] && [ -n "${OCIR_USERNAME}" ] && [ -n "${OCIR_AUTH_TOKEN}" -o -n "${OCIR_AUTH_TOKEN_SECRET_OCID}" ]; then
         bash scripts/build_and_push_ocir_image.sh
       else
-        echo "OCIR env vars not fully set. Skipping container build/push."
+        echo "OCIR env vars not fully set (need namespace, username, and token or secret OCID). Skipping container build/push."
       fi
   - type: Command
     name: Package training code

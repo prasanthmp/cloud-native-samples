@@ -1,0 +1,73 @@
+version: 0.1
+component: build
+timeoutInSeconds: 3600
+shell: bash
+env:
+  variables:
+    PROJECT_ROOT: "${project_root}"
+    PACKAGE_DIR: dist
+    PACKAGE_NAME: training_bundle.zip
+    JOB_OCID: "${job_ocid}"
+    COMPARTMENT_OCID: "${compartment_ocid}"
+    OCIR_REGION_CODE: "${ocir_region_code}"
+    OCIR_NAMESPACE: "${ocir_namespace}"
+    OCIR_REPOSITORY: "${ocir_repository}"
+    IMAGE_TAG: "${image_tag}"
+    OCIR_USERNAME: "${ocir_username}"
+    OCIR_AUTH_TOKEN: "${ocir_auth_token}"
+    OCIR_AUTH_TOKEN_SECRET_OCID: "${ocir_auth_token_secret_ocid}"
+steps:
+  - type: Command
+    name: Install dependencies
+    command: |
+      if [ -d "$${OCI_PRIMARY_SOURCE_DIR}/$${PROJECT_ROOT}/training" ]; then
+        cd "$${OCI_PRIMARY_SOURCE_DIR}/$${PROJECT_ROOT}"
+      elif [ -d "$${OCI_PRIMARY_SOURCE_DIR}/training" ]; then
+        cd "$${OCI_PRIMARY_SOURCE_DIR}"
+      else
+        echo "training/ directory not found from OCI_PRIMARY_SOURCE_DIR=$${OCI_PRIMARY_SOURCE_DIR}"
+        exit 1
+      fi
+      pip3 install --prefer-binary -r training/requirements.txt
+  - type: Command
+    name: Build and push container image to OCIR
+    command: |
+      if [ -d "$${OCI_PRIMARY_SOURCE_DIR}/$${PROJECT_ROOT}/training" ]; then
+        cd "$${OCI_PRIMARY_SOURCE_DIR}/$${PROJECT_ROOT}"
+      else
+        cd "$${OCI_PRIMARY_SOURCE_DIR}"
+      fi
+      if [ -n "$${OCIR_NAMESPACE}" ] && [ -n "$${OCIR_USERNAME}" ] && [ -n "$${OCIR_AUTH_TOKEN}" -o -n "$${OCIR_AUTH_TOKEN_SECRET_OCID}" ]; then
+        bash scripts/build_and_push_ocir_image.sh
+      else
+        echo "OCIR env vars not fully set (need namespace, username, and token or secret OCID). Skipping container build/push."
+      fi
+  - type: Command
+    name: Package training code
+    command: |
+      if [ -d "$${OCI_PRIMARY_SOURCE_DIR}/$${PROJECT_ROOT}/training" ]; then
+        cd "$${OCI_PRIMARY_SOURCE_DIR}/$${PROJECT_ROOT}"
+      else
+        cd "$${OCI_PRIMARY_SOURCE_DIR}"
+      fi
+      rm -rf $${PACKAGE_DIR}
+      mkdir -p $${PACKAGE_DIR}
+      zip -r $${PACKAGE_DIR}/$${PACKAGE_NAME} training scripts
+      ls -lah $${PACKAGE_DIR}
+  - type: Command
+    name: Deploy step - trigger Data Science Job
+    command: |
+      if [ -d "$${OCI_PRIMARY_SOURCE_DIR}/$${PROJECT_ROOT}/training" ]; then
+        cd "$${OCI_PRIMARY_SOURCE_DIR}/$${PROJECT_ROOT}"
+      else
+        cd "$${OCI_PRIMARY_SOURCE_DIR}"
+      fi
+      if [ -n "$${JOB_OCID}" ] && [ -n "$${COMPARTMENT_OCID}" ]; then
+        bash scripts/trigger_datascience_job_run.sh
+      else
+        echo "JOB_OCID or COMPARTMENT_OCID not set. Skipping Data Science Job trigger."
+      fi
+outputArtifacts:
+  - name: training_bundle
+    type: BINARY
+    location: $${OCI_PRIMARY_SOURCE_DIR}/$${PROJECT_ROOT}/$${PACKAGE_DIR}/$${PACKAGE_NAME}

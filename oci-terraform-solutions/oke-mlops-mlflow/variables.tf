@@ -253,6 +253,79 @@ variable "devops_repository_branch" {
   default     = "main"
 }
 
+variable "devops_trigger_file_paths" {
+  type        = list(string)
+  description = "Optional list of repository paths to monitor for GitHub push trigger. When empty, all paths trigger builds."
+  default     = []
+}
+
+variable "devops_project_root" {
+  type        = string
+  description = "Repository path that contains this project (used when rendering devops/build_spec.yaml)."
+  default     = "oci-terraform-solutions/oke-mlops-mlflow"
+}
+
+variable "devops_build_job_ocid" {
+  type        = string
+  description = "Data Science Job OCID to pass into build_spec env (JOB_OCID). If null and create_datascience_job=true, Terraform uses the created job OCID."
+  default     = null
+  nullable    = true
+}
+
+variable "devops_build_compartment_ocid" {
+  type        = string
+  description = "Compartment OCID passed into build_spec env (COMPARTMENT_OCID). If null, uses var.compartment_id."
+  default     = null
+  nullable    = true
+}
+
+variable "devops_build_ocir_region_code" {
+  type        = string
+  description = "OCIR region code passed into build_spec env (for example: iad)."
+  default     = "iad"
+}
+
+variable "devops_build_ocir_namespace" {
+  type        = string
+  description = "OCIR namespace passed into build_spec env."
+  default     = null
+  nullable    = true
+}
+
+variable "devops_build_ocir_repository" {
+  type        = string
+  description = "OCIR repository name passed into build_spec env."
+  default     = "mlflow-training"
+}
+
+variable "devops_build_image_tag" {
+  type        = string
+  description = "Container image tag passed into build_spec env."
+  default     = "latest"
+}
+
+variable "devops_build_ocir_username" {
+  type        = string
+  description = "OCIR username (<namespace>/<username>) passed into build_spec env."
+  default     = null
+  nullable    = true
+}
+
+variable "devops_build_ocir_auth_token" {
+  type        = string
+  description = "OCIR auth token passed into build_spec env. Prefer using OCI DevOps secret variables in production."
+  default     = null
+  nullable    = true
+  sensitive   = true
+}
+
+variable "devops_build_ocir_auth_token_secret_ocid" {
+  type        = string
+  description = "OCI Vault secret OCID containing OCIR auth token. Build script can fetch and decode this secret at runtime when OCIR_AUTH_TOKEN is empty."
+  default     = null
+  nullable    = true
+}
+
 variable "datascience_subnet_id" {
   type        = string
   description = "Optional subnet OCID for Data Science notebook session. If null, uses the Terraform-created private Data Science subnet."
