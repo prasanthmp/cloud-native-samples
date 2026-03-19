@@ -103,6 +103,26 @@ output "devops_github_trigger_id" {
   value       = var.create_devops_pipeline ? oci_devops_trigger.github_push_build[0].id : null
 }
 
+output "policy_oke_cluster_id" {
+  description = "IAM policy OCID for OKE workload permissions"
+  value       = var.create_oke_workload_policy ? oci_identity_policy.oke_cluster[0].id : null
+}
+
+output "policy_devops_build_id" {
+  description = "IAM policy OCID for OCI DevOps build pipeline permissions"
+  value       = var.create_project_iam_policies && var.create_devops_pipeline ? oci_identity_policy.devops_build_pipeline[0].id : null
+}
+
+output "policy_devops_deploy_id" {
+  description = "IAM policy OCID for OCI DevOps deploy pipeline permissions"
+  value       = var.create_project_iam_policies && var.create_devops_pipeline && var.create_devops_deploy_pipeline ? oci_identity_policy.devops_deploy_pipeline[0].id : null
+}
+
+output "policy_datascience_runtime_id" {
+  description = "IAM policy OCID for OCI Data Science notebook/job runtime permissions"
+  value       = var.create_project_iam_policies && (var.create_datascience_job || var.create_datascience_notebook) ? oci_identity_policy.datascience_runtime[0].id : null
+}
+
 output "node_image_ocid" {
   description = "Node image OCID used by the node pool"
   value       = var.node_image_ocid

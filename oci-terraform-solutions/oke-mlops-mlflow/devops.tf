@@ -25,19 +25,23 @@ resource "local_file" "devops_deploy_command_spec" {
   count    = var.create_devops_pipeline && var.create_devops_deploy_pipeline ? 1 : 0
   filename = "${path.module}/devops/deploy_command_spec.yaml"
   content = templatefile("${path.module}/devops/deploy_command_spec.yaml.tftpl", {
-    region              = var.region
-    cluster_id          = oci_containerengine_cluster.oke.id
-    timeout_in_seconds  = var.devops_deploy_stage_timeout_in_seconds
-    serving_namespace   = var.serving_k8s_namespace
-    serving_deployment  = var.serving_k8s_deployment_name
-    serving_service     = var.serving_k8s_service_name
-    mlflow_tracking_uri = var.serving_mlflow_tracking_uri
-    mlflow_model_name   = var.serving_mlflow_model_name
-    mlflow_model_stage  = var.serving_mlflow_model_stage
-    ocir_region_code    = var.devops_build_ocir_region_code
-    ocir_namespace      = coalesce(var.devops_build_ocir_namespace, "")
-    ocir_repository     = local.devops_build_serving_ocir_repository_value
-    image_tag           = var.devops_build_image_tag
+    region                         = var.region
+    cluster_id                     = oci_containerengine_cluster.oke.id
+    timeout_in_seconds             = var.devops_deploy_stage_timeout_in_seconds
+    serving_namespace              = var.serving_k8s_namespace
+    serving_deployment             = var.serving_k8s_deployment_name
+    serving_service                = var.serving_k8s_service_name
+    mlflow_tracking_uri            = var.serving_mlflow_tracking_uri
+    mlflow_model_name              = var.serving_mlflow_model_name
+    mlflow_model_stage             = var.serving_mlflow_model_stage
+    ocir_region_code               = var.devops_build_ocir_region_code
+    ocir_namespace                 = coalesce(var.devops_build_ocir_namespace, "")
+    ocir_repository                = local.devops_build_serving_ocir_repository_value
+    image_tag                      = var.devops_build_image_tag
+    ocir_username                  = var.devops_build_ocir_username != null ? var.devops_build_ocir_username : ""
+    ocir_auth_token                = var.devops_build_ocir_auth_token != null ? var.devops_build_ocir_auth_token : ""
+    ocir_auth_token_secret_ocid    = var.devops_build_ocir_auth_token_secret_ocid != null ? var.devops_build_ocir_auth_token_secret_ocid : ""
+    serving_image_pull_secret_name = var.serving_image_pull_secret_name
   })
 }
 
@@ -108,19 +112,23 @@ resource "oci_devops_deploy_artifact" "serving_command_spec" {
   deploy_artifact_source {
     deploy_artifact_source_type = "INLINE"
     base64encoded_content = base64encode(templatefile("${path.module}/devops/deploy_command_spec.yaml.tftpl", {
-      region              = var.region
-      cluster_id          = oci_containerengine_cluster.oke.id
-      timeout_in_seconds  = var.devops_deploy_stage_timeout_in_seconds
-      serving_namespace   = var.serving_k8s_namespace
-      serving_deployment  = var.serving_k8s_deployment_name
-      serving_service     = var.serving_k8s_service_name
-      mlflow_tracking_uri = var.serving_mlflow_tracking_uri
-      mlflow_model_name   = var.serving_mlflow_model_name
-      mlflow_model_stage  = var.serving_mlflow_model_stage
-      ocir_region_code    = var.devops_build_ocir_region_code
-      ocir_namespace      = coalesce(var.devops_build_ocir_namespace, "")
-      ocir_repository     = local.devops_build_serving_ocir_repository_value
-      image_tag           = var.devops_build_image_tag
+      region                         = var.region
+      cluster_id                     = oci_containerengine_cluster.oke.id
+      timeout_in_seconds             = var.devops_deploy_stage_timeout_in_seconds
+      serving_namespace              = var.serving_k8s_namespace
+      serving_deployment             = var.serving_k8s_deployment_name
+      serving_service                = var.serving_k8s_service_name
+      mlflow_tracking_uri            = var.serving_mlflow_tracking_uri
+      mlflow_model_name              = var.serving_mlflow_model_name
+      mlflow_model_stage             = var.serving_mlflow_model_stage
+      ocir_region_code               = var.devops_build_ocir_region_code
+      ocir_namespace                 = coalesce(var.devops_build_ocir_namespace, "")
+      ocir_repository                = local.devops_build_serving_ocir_repository_value
+      image_tag                      = var.devops_build_image_tag
+      ocir_username                  = var.devops_build_ocir_username != null ? var.devops_build_ocir_username : ""
+      ocir_auth_token                = var.devops_build_ocir_auth_token != null ? var.devops_build_ocir_auth_token : ""
+      ocir_auth_token_secret_ocid    = var.devops_build_ocir_auth_token_secret_ocid != null ? var.devops_build_ocir_auth_token_secret_ocid : ""
+      serving_image_pull_secret_name = var.serving_image_pull_secret_name
     }))
   }
 }

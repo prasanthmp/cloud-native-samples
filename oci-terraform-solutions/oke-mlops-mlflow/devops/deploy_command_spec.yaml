@@ -17,6 +17,11 @@ steps:
       MLFLOW_MODEL_NAME="iris-logreg-model"
       MLFLOW_MODEL_STAGE="Production"
       IMAGE_URI="iad.ocir.io/idxlfhtrvfsa/mlflow-serving:latest"
+      OCIR_REGISTRY="iad.ocir.io"
+      OCIR_USERNAME="idxlfhtrvfsa/prasanth.prasad@oracle.com"
+      OCIR_AUTH_TOKEN=""
+      OCIR_AUTH_TOKEN_SECRET_OCID="ocid1.vaultsecret.oc1.iad.amaaaaaak6zxdwaayveuyoez3pu6g5vypoewcqs637w53w375oeavdtcccya"
+      IMAGE_PULL_SECRET="ocir-pull-secret"
 
       echo "Deploying serving image: $IMAGE_URI"
 
@@ -30,6 +35,20 @@ steps:
       export KUBECONFIG=/tmp/kubeconfig
 
       kubectl get namespace "$SERVING_NAMESPACE" >/dev/null 2>&1 || kubectl create namespace "$SERVING_NAMESPACE"
+
+      if [ -z "$OCIR_AUTH_TOKEN" ] && [ -n "$OCIR_AUTH_TOKEN_SECRET_OCID" ]; then
+        TOKEN_B64="$(oci secrets secret-bundle get --secret-id "$OCIR_AUTH_TOKEN_SECRET_OCID" --query 'data."secret-bundle-content".content' --raw-output)"
+        OCIR_AUTH_TOKEN="$(printf '%s' "$TOKEN_B64" | base64 --decode)"
+      fi
+
+      : "${OCIR_USERNAME:?Set OCIR username in Terraform variable devops_build_ocir_username}"
+      : "${OCIR_AUTH_TOKEN:?Set OCIR token (devops_build_ocir_auth_token) or OCIR token secret OCID (devops_build_ocir_auth_token_secret_ocid)}"
+
+      kubectl -n "$SERVING_NAMESPACE" create secret docker-registry "$IMAGE_PULL_SECRET" \
+        --docker-server "$OCIR_REGISTRY" \
+        --docker-username "$OCIR_USERNAME" \
+        --docker-password "$OCIR_AUTH_TOKEN" \
+        --dry-run=client -o yaml | kubectl apply -f -
 
       cat >/tmp/mlflow-serving-deployment.yaml <<EOF
       apiVersion: apps/v1
@@ -49,6 +68,8 @@ steps:
             labels:
               app: mlflow-serving
           spec:
+            imagePullSecrets:
+            - name: $IMAGE_PULL_SECRET
             containers:
             - name: mlflow-serving
               image: $IMAGE_URI

@@ -211,19 +211,6 @@ resource "oci_core_subnet" "datascience" {
   prohibit_public_ip_on_vnic = true
 }
 
-resource "oci_identity_policy" "oke_cluster" {
-  count          = var.create_oke_workload_policy ? 1 : 0
-  compartment_id = var.tenancy_ocid
-  name           = "${var.cluster_name}-oke-workload-policy"
-  description    = "Allows OKE cluster workloads to manage OCI resources needed by Kubernetes services."
-
-  statements = [
-    "Allow any-user to manage load-balancers in compartment id ${var.compartment_id} where all {request.principal.type = 'cluster', request.principal.compartment.id = '${var.compartment_id}'}",
-    "Allow any-user to use subnets in compartment id ${var.compartment_id} where all {request.principal.type = 'cluster', request.principal.compartment.id = '${var.compartment_id}'}",
-    "Allow any-user to manage vnics in compartment id ${var.compartment_id} where all {request.principal.type = 'cluster', request.principal.compartment.id = '${var.compartment_id}'}"
-  ]
-}
-
 resource "oci_containerengine_cluster" "oke" {
   compartment_id     = var.compartment_id
   kubernetes_version = local.selected_kubernetes_version

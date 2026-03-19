@@ -428,6 +428,12 @@ variable "serving_mlflow_model_stage" {
   default     = "Production"
 }
 
+variable "serving_image_pull_secret_name" {
+  type        = string
+  description = "Kubernetes secret name used by serving pods to pull private images from OCIR."
+  default     = "ocir-pull-secret"
+}
+
 variable "create_ocir_training_repository" {
   type        = bool
   description = "If true, creates the OCIR repository used for training image pushes."
@@ -523,5 +529,11 @@ variable "datascience_subnet_cidr" {
 variable "create_oke_workload_policy" {
   type        = bool
   description = "If true, creates an IAM policy for OKE Service LoadBalancer operations"
+  default     = true
+}
+
+variable "create_project_iam_policies" {
+  type        = bool
+  description = "If true, creates IAM policies for OKE, OCI DevOps build, and OCI DevOps deploy principals."
   default     = true
 }

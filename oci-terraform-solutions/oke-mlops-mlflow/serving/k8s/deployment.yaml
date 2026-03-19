@@ -15,6 +15,8 @@ spec:
       labels:
         app: mlflow-serving
     spec:
+      imagePullSecrets:
+        - name: ocir-pull-secret
       containers:
         - name: mlflow-serving
           image: iad.ocir.io/<namespace>/mlflow-serving:latest
