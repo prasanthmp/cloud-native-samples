@@ -7,7 +7,7 @@ env:
     PROJECT_ROOT: "oci-terraform-solutions/oke-mlops-mlflow"
     PACKAGE_DIR: dist
     PACKAGE_NAME: training_bundle.zip
-    JOB_OCID: "ocid1.datasciencejob.oc1.iad.<your_job_ocid>"
+    JOB_OCID: "ocid1.datasciencejob.oc1.iad.amaaaaaak6zxdwaayscvo4j5tjdo7bseqgxbs5k4ffpwqx5g64jatdhoznja"
     COMPARTMENT_OCID: "ocid1.compartment.oc1..aaaaaaaakudebt2qkiq7rigx53xbsanwjxzr42tw46ktdmyejwotqsclgo6q"
     OCIR_REGION_CODE: "iad"
     OCIR_NAMESPACE: "idxlfhtrvfsa"
