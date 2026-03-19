@@ -73,6 +73,21 @@ output "devops_build_stage_id" {
   value       = var.create_devops_pipeline ? oci_devops_build_pipeline_stage.build_and_deploy[0].id : null
 }
 
+output "devops_trigger_deployment_stage_id" {
+  description = "OCI DevOps build stage OCID that triggers the deployment pipeline"
+  value       = var.create_devops_pipeline ? oci_devops_build_pipeline_stage.trigger_deploy_pipeline[0].id : null
+}
+
+output "devops_deploy_pipeline_id" {
+  description = "OCI DevOps deployment pipeline OCID"
+  value       = var.create_devops_pipeline ? oci_devops_deploy_pipeline.mlflow_training[0].id : null
+}
+
+output "devops_deploy_shell_stage_id" {
+  description = "OCI DevOps deployment shell stage OCID that triggers the Data Science job"
+  value       = var.create_devops_pipeline ? oci_devops_deploy_stage.trigger_datascience_job[0].id : null
+}
+
 output "devops_github_trigger_id" {
   description = "OCI DevOps GitHub trigger OCID"
   value       = var.create_devops_pipeline ? oci_devops_trigger.github_push_build[0].id : null

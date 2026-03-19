@@ -7,7 +7,6 @@ env:
     PROJECT_ROOT: "${project_root}"
     PACKAGE_DIR: dist
     PACKAGE_NAME: training_bundle.zip
-    COMPARTMENT_OCID: "${compartment_ocid}"
     OCIR_REGION_CODE: "${ocir_region_code}"
     OCIR_NAMESPACE: "${ocir_namespace}"
     OCIR_REPOSITORY: "${ocir_repository}"
@@ -53,19 +52,6 @@ steps:
       mkdir -p $${PACKAGE_DIR}
       zip -r $${PACKAGE_DIR}/$${PACKAGE_NAME} training scripts
       ls -lah $${PACKAGE_DIR}
-  - type: Command
-    name: Deploy step - trigger Data Science Job
-    command: |
-      if [ -d "$${OCI_PRIMARY_SOURCE_DIR}/$${PROJECT_ROOT}/training" ]; then
-        cd "$${OCI_PRIMARY_SOURCE_DIR}/$${PROJECT_ROOT}"
-      else
-        cd "$${OCI_PRIMARY_SOURCE_DIR}"
-      fi
-      if [ -n "$${COMPARTMENT_OCID}" ]; then
-        bash scripts/trigger_datascience_job_run.sh
-      else
-        echo "COMPARTMENT_OCID not set. Skipping Data Science Job trigger."
-      fi
 outputArtifacts:
   - name: training_bundle
     type: BINARY

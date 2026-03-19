@@ -278,13 +278,6 @@ variable "devops_build_compartment_ocid" {
   nullable    = true
 }
 
-variable "devops_build_project_ocid" {
-  type        = string
-  description = "Data Science project OCID passed into build_spec env (PROJECT_OCID). If null, uses the resolved Data Science project ID."
-  default     = null
-  nullable    = true
-}
-
 variable "devops_build_ocir_region_code" {
   type        = string
   description = "OCIR region code passed into build_spec env (for example: iad)."
@@ -349,6 +342,48 @@ variable "ocir_training_repository_compartment_id" {
   description = "Compartment OCID where the OCIR training repository is created. If null, uses var.compartment_id."
   default     = null
   nullable    = true
+}
+
+variable "devops_deploy_pipeline_name" {
+  type        = string
+  description = "OCI DevOps deployment pipeline display name"
+  default     = "mlflow-training-deploy-pipeline"
+}
+
+variable "devops_trigger_deployment_stage_name" {
+  type        = string
+  description = "OCI DevOps build stage display name that triggers the deployment pipeline"
+  default     = "trigger-training-deploy-pipeline"
+}
+
+variable "devops_shell_deploy_stage_name" {
+  type        = string
+  description = "OCI DevOps deployment shell stage display name"
+  default     = "trigger-datascience-job"
+}
+
+variable "devops_shell_deploy_stage_timeout_seconds" {
+  type        = number
+  description = "Timeout in seconds for OCI DevOps shell deploy stage execution"
+  default     = 3600
+}
+
+variable "devops_shell_stage_shape" {
+  type        = string
+  description = "Container instance shape used by OCI DevOps shell deploy stage"
+  default     = "CI.Standard.E4.Flex"
+}
+
+variable "devops_shell_stage_ocpus" {
+  type        = number
+  description = "OCPUs for OCI DevOps shell deploy stage container instance shape config"
+  default     = 1
+}
+
+variable "devops_shell_stage_memory_gb" {
+  type        = number
+  description = "Memory in GB for OCI DevOps shell deploy stage container instance shape config"
+  default     = 2
 }
 
 variable "datascience_subnet_id" {

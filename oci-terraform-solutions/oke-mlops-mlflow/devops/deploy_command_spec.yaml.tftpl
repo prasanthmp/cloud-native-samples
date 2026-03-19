@@ -1,0 +1,42 @@
+version: 0.1
+component: command
+timeoutInSeconds: 3600
+shell: bash
+env:
+  variables:
+    COMPARTMENT_OCID: "${compartment_ocid}"
+steps:
+  - type: Command
+    name: Trigger Data Science Job
+    command: |
+      : "$${COMPARTMENT_OCID:?Set COMPARTMENT_OCID}"
+      JOB_OCID="$$(oci data-science job list \
+        --compartment-id "$${COMPARTMENT_OCID}" \
+        --lifecycle-state ACTIVE \
+        --query 'data[0].id' \
+        --raw-output)"
+      if [ -z "$${JOB_OCID}" ] || [ "$${JOB_OCID}" = "null" ]; then
+        echo "No ACTIVE Data Science Job found in compartment $${COMPARTMENT_OCID}."
+        exit 1
+      fi
+      PROJECT_OCID="$$(oci data-science job get \
+        --job-id "$${JOB_OCID}" \
+        --query 'data.\"project-id\"' \
+        --raw-output)"
+      DISPLAY_NAME="ml-training-run-$$(date +%Y%m%d-%H%M%S)"
+      echo "Executing command:"
+      echo "oci data-science job-run create \\"
+      echo "  --job-id \"$${JOB_OCID}\" \\"
+      echo "  --project-id \"$${PROJECT_OCID}\" \\"
+      echo "  --compartment-id \"$${COMPARTMENT_OCID}\" \\"
+      echo "  --display-name \"$${DISPLAY_NAME}\" \\"
+      echo "  --query 'data.id' \\"
+      echo "  --raw-output"
+      JOB_RUN_OCID="$$(oci data-science job-run create \
+        --job-id "$${JOB_OCID}" \
+        --project-id "$${PROJECT_OCID}" \
+        --compartment-id "$${COMPARTMENT_OCID}" \
+        --display-name "$${DISPLAY_NAME}" \
+        --query 'data.id' \
+        --raw-output)"
+      echo "Started OCI Data Science Job Run: $${JOB_RUN_OCID}"
