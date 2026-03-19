@@ -27,7 +27,7 @@ steps:
         echo "training/ directory not found from OCI_PRIMARY_SOURCE_DIR=${OCI_PRIMARY_SOURCE_DIR}"
         exit 1
       fi
-      pip3 install -r training/requirements.txt
+      pip3 install --prefer-binary -r training/requirements.txt
   - type: Command
     name: Build and push container image to OCIR
     command: |
