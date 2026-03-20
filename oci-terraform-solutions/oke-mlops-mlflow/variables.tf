@@ -76,12 +76,6 @@ variable "create_datascience_notebook" {
   default     = true
 }
 
-variable "create_datascience_job" {
-  type        = bool
-  description = "If true, creates an OCI Data Science Job for model training."
-  default     = false
-}
-
 variable "existing_datascience_project_id" {
   type        = string
   description = "Existing OCI Data Science project OCID to use when create_datascience_notebook is false."
@@ -215,18 +209,6 @@ variable "object_storage_model_backup_prefix" {
   default     = "models"
 }
 
-variable "create_devops_pipeline" {
-  type        = bool
-  description = "If true, creates OCI DevOps project, build pipeline, build stage, and GitHub trigger."
-  default     = false
-}
-
-variable "create_devops_github_connection" {
-  type        = bool
-  description = "If true, creates an OCI DevOps GitHub external connection using an OCI Vault secret OCID."
-  default     = false
-}
-
 variable "devops_project_name" {
   type        = string
   description = "OCI DevOps project name"
@@ -333,7 +315,7 @@ variable "devops_notification_topic_name" {
 
 variable "devops_github_connection_id" {
   type        = string
-  description = "Existing OCI DevOps connection OCID for GitHub. Leave null when create_devops_github_connection=true."
+  description = "Existing OCI DevOps connection OCID for GitHub. If null, Terraform creates and manages one using devops_github_access_token_secret_id."
   default     = null
   nullable    = true
 }
@@ -346,7 +328,7 @@ variable "devops_github_connection_name" {
 
 variable "devops_github_access_token_secret_id" {
   type        = string
-  description = "OCI Vault secret OCID storing the GitHub personal access token (required when create_devops_github_connection=true)."
+  description = "OCI Vault secret OCID storing the GitHub personal access token (required only when devops_github_connection_id is null)."
   default     = null
   nullable    = true
 }
@@ -457,7 +439,8 @@ variable "serving_k8s_service_name" {
 variable "serving_mlflow_tracking_uri" {
   type        = string
   description = "MLflow tracking URI passed to serving deployment."
-  default     = "http://129.80.216.101"
+  default     = null
+  nullable    = true
 }
 
 variable "serving_mlflow_model_name" {
@@ -532,6 +515,66 @@ variable "mlflow_image" {
   type        = string
   description = "MLflow container image"
   default     = "ghcr.io/mlflow/mlflow:v2.12.2"
+}
+
+variable "mlflow_use_object_storage_artifacts" {
+  type        = bool
+  description = "If true and S3 credentials are provided, MLflow stores artifacts in OCI Object Storage (S3-compatible endpoint)."
+  default     = true
+}
+
+variable "create_mlflow_artifact_bucket" {
+  type        = bool
+  description = "If true, creates a dedicated Object Storage bucket for MLflow artifacts."
+  default     = true
+}
+
+variable "mlflow_artifact_bucket_name" {
+  type        = string
+  description = "Object Storage bucket name used by MLflow artifact store."
+  default     = "mlops-mlflow-artifacts"
+}
+
+variable "mlflow_artifact_bucket_compartment_id" {
+  type        = string
+  description = "Compartment OCID where the MLflow artifact bucket is created. If null, uses var.compartment_id."
+  default     = null
+  nullable    = true
+}
+
+variable "mlflow_artifact_object_prefix" {
+  type        = string
+  description = "Object prefix for MLflow artifacts inside the bucket."
+  default     = "artifacts"
+}
+
+variable "mlflow_s3_access_key_id" {
+  type        = string
+  description = "OCI Customer Secret Key access key used by MLflow/boto3 via AWS_ACCESS_KEY_ID for OCI Object Storage S3-compatible access."
+  default     = null
+  nullable    = true
+}
+
+variable "mlflow_s3_access_key_id_secret_ocid" {
+  type        = string
+  description = "OCI Vault secret OCID that stores the MLflow S3 access key ID. If set, Terraform reads and decodes the secret value."
+  default     = null
+  nullable    = true
+}
+
+variable "mlflow_s3_secret_access_key" {
+  type        = string
+  description = "OCI Customer Secret Key secret used by MLflow/boto3 via AWS_SECRET_ACCESS_KEY for OCI Object Storage S3-compatible access."
+  default     = null
+  nullable    = true
+  sensitive   = true
+}
+
+variable "mlflow_s3_secret_access_key_secret_ocid" {
+  type        = string
+  description = "OCI Vault secret OCID that stores the MLflow S3 secret access key. If set, Terraform reads and decodes the secret value."
+  default     = null
+  nullable    = true
 }
 
 variable "mlflow_namespace" {

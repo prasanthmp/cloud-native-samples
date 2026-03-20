@@ -13,7 +13,8 @@ steps:
       SERVING_NAMESPACE="mlflow"
       SERVING_DEPLOYMENT="mlflow-serving"
       SERVING_SERVICE="mlflow-serving"
-      MLFLOW_TRACKING_URI="http://129.80.216.101"
+      MLFLOW_NAMESPACE="mlflow"
+      MLFLOW_TRACKING_URI=""
       MLFLOW_MODEL_NAME="iris-logreg-model"
       MLFLOW_MODEL_STAGE="Production"
       IMAGE_URI="iad.ocir.io/idxlfhtrvfsa/mlflow-serving:latest"
@@ -35,6 +36,21 @@ steps:
       export KUBECONFIG=/tmp/kubeconfig
 
       kubectl get namespace "$SERVING_NAMESPACE" >/dev/null 2>&1 || kubectl create namespace "$SERVING_NAMESPACE"
+
+      if [ -z "$MLFLOW_TRACKING_URI" ]; then
+        MLFLOW_LB_IP="$(kubectl -n "$MLFLOW_NAMESPACE" get svc mlflow -o jsonpath='{.status.loadBalancer.ingress[0].ip}' 2>/dev/null || true)"
+        MLFLOW_LB_HOST="$(kubectl -n "$MLFLOW_NAMESPACE" get svc mlflow -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' 2>/dev/null || true)"
+        if [ -n "$MLFLOW_LB_IP" ]; then
+          MLFLOW_TRACKING_URI="http://$MLFLOW_LB_IP"
+        elif [ -n "$MLFLOW_LB_HOST" ]; then
+          MLFLOW_TRACKING_URI="http://$MLFLOW_LB_HOST"
+        else
+          echo "Unable to resolve MLflow tracking URI at runtime from service mlflow in namespace $MLFLOW_NAMESPACE."
+          echo "Set serving_mlflow_tracking_uri explicitly or ensure MLflow service has external endpoint."
+          exit 1
+        fi
+      fi
+      echo "Using MLflow tracking URI: $MLFLOW_TRACKING_URI"
 
       if [ -z "$OCIR_AUTH_TOKEN" ] && [ -n "$OCIR_AUTH_TOKEN_SECRET_OCID" ]; then
         TOKEN_B64="$(oci secrets secret-bundle get --secret-id "$OCIR_AUTH_TOKEN_SECRET_OCID" --query 'data."secret-bundle-content".content' --raw-output)"

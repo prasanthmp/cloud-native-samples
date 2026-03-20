@@ -19,7 +19,7 @@ from sklearn.model_selection import train_test_split
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Train a basic Iris model and log to MLflow")
-    parser.add_argument("--mlflow-tracking-uri", default=os.getenv("MLFLOW_TRACKING_URI", "http://129.80.216.101"))
+    parser.add_argument("--mlflow-tracking-uri", default=os.getenv("MLFLOW_TRACKING_URI", ""))
     parser.add_argument("--experiment-name", default=os.getenv("MLFLOW_EXPERIMENT_NAME", "basic-iris-training-pipeline"))
     parser.add_argument("--registered-model-name", default=os.getenv("MLFLOW_REGISTERED_MODEL_NAME", "iris-logreg-model"))
     parser.add_argument("--object-storage-namespace", default=os.getenv("OBJECT_STORAGE_NAMESPACE", ""))
@@ -117,6 +117,8 @@ def backup_model_to_object_storage(
 
 def main() -> None:
     args = parse_args()
+    if not args.mlflow_tracking_uri:
+        raise ValueError("MLFLOW_TRACKING_URI is required. Set it explicitly or via Data Science job environment variables.")
 
     mlflow.set_tracking_uri(args.mlflow_tracking_uri)
     mlflow.set_experiment(args.experiment_name)

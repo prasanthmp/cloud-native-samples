@@ -12,7 +12,7 @@ resource "oci_identity_policy" "oke_cluster" {
 }
 
 resource "oci_identity_policy" "devops_build_pipeline" {
-  count          = var.create_project_iam_policies && var.create_devops_pipeline ? 1 : 0
+  count          = var.create_project_iam_policies ? 1 : 0
   compartment_id = var.tenancy_ocid
   name           = "${var.cluster_name}-devops-build-policy"
   description    = "Allows OCI DevOps build pipeline principal to read secrets and trigger Data Science job runs."
@@ -26,7 +26,7 @@ resource "oci_identity_policy" "devops_build_pipeline" {
 }
 
 resource "oci_identity_policy" "devops_deploy_pipeline" {
-  count          = var.create_project_iam_policies && var.create_devops_pipeline && var.create_devops_deploy_pipeline ? 1 : 0
+  count          = var.create_project_iam_policies && var.create_devops_deploy_pipeline ? 1 : 0
   compartment_id = var.tenancy_ocid
   name           = "${var.cluster_name}-devops-deploy-policy"
   description    = "Allows OCI DevOps deploy pipeline principal to create shell stage container instances and deploy to OKE."
@@ -37,7 +37,7 @@ resource "oci_identity_policy" "devops_deploy_pipeline" {
 }
 
 resource "oci_identity_policy" "datascience_runtime" {
-  count          = var.create_project_iam_policies && (var.create_datascience_job || var.create_datascience_notebook) ? 1 : 0
+  count          = var.create_project_iam_policies ? 1 : 0
   compartment_id = var.tenancy_ocid
   name           = "${var.cluster_name}-datascience-runtime-policy"
   description    = "Allows OCI Data Science notebook and job run principals to access required project resources."

@@ -35,7 +35,7 @@ output "datascience_notebook_session_url" {
 
 output "datascience_job_id" {
   description = "OCI Data Science training job OCID"
-  value       = var.create_datascience_job ? oci_datascience_job.training[0].id : null
+  value       = oci_datascience_job.training[0].id
 }
 
 output "ocir_training_repository_id" {
@@ -75,32 +75,32 @@ output "devops_github_connection_id" {
 
 output "devops_build_pipeline_id" {
   description = "OCI DevOps build pipeline OCID"
-  value       = var.create_devops_pipeline ? oci_devops_build_pipeline.mlflow_training[0].id : null
+  value       = oci_devops_build_pipeline.mlflow_training[0].id
 }
 
 output "devops_build_stage_id" {
   description = "OCI DevOps build stage OCID"
-  value       = var.create_devops_pipeline ? oci_devops_build_pipeline_stage.build_and_deploy[0].id : null
+  value       = oci_devops_build_pipeline_stage.build_and_deploy[0].id
 }
 
 output "devops_build_trigger_deploy_stage_id" {
   description = "OCI DevOps build stage OCID that triggers serving deploy pipeline"
-  value       = var.create_devops_pipeline && var.create_devops_deploy_pipeline ? oci_devops_build_pipeline_stage.trigger_serving_deploy[0].id : null
+  value       = var.create_devops_deploy_pipeline ? oci_devops_build_pipeline_stage.trigger_serving_deploy[0].id : null
 }
 
 output "devops_deploy_pipeline_id" {
   description = "OCI DevOps deploy pipeline OCID for serving deployment"
-  value       = var.create_devops_pipeline && var.create_devops_deploy_pipeline ? oci_devops_deploy_pipeline.serving[0].id : null
+  value       = var.create_devops_deploy_pipeline ? oci_devops_deploy_pipeline.serving[0].id : null
 }
 
 output "devops_deploy_stage_id" {
   description = "OCI DevOps deploy stage OCID for serving deployment"
-  value       = var.create_devops_pipeline && var.create_devops_deploy_pipeline ? oci_devops_deploy_stage.deploy_serving_shell[0].id : null
+  value       = var.create_devops_deploy_pipeline ? oci_devops_deploy_stage.deploy_serving_shell[0].id : null
 }
 
 output "devops_github_trigger_id" {
   description = "OCI DevOps GitHub trigger OCID"
-  value       = var.create_devops_pipeline ? oci_devops_trigger.github_push_build[0].id : null
+  value       = oci_devops_trigger.github_push_build[0].id
 }
 
 output "policy_oke_cluster_id" {
@@ -110,17 +110,17 @@ output "policy_oke_cluster_id" {
 
 output "policy_devops_build_id" {
   description = "IAM policy OCID for OCI DevOps build pipeline permissions"
-  value       = var.create_project_iam_policies && var.create_devops_pipeline ? oci_identity_policy.devops_build_pipeline[0].id : null
+  value       = var.create_project_iam_policies ? oci_identity_policy.devops_build_pipeline[0].id : null
 }
 
 output "policy_devops_deploy_id" {
   description = "IAM policy OCID for OCI DevOps deploy pipeline permissions"
-  value       = var.create_project_iam_policies && var.create_devops_pipeline && var.create_devops_deploy_pipeline ? oci_identity_policy.devops_deploy_pipeline[0].id : null
+  value       = var.create_project_iam_policies && var.create_devops_deploy_pipeline ? oci_identity_policy.devops_deploy_pipeline[0].id : null
 }
 
 output "policy_datascience_runtime_id" {
   description = "IAM policy OCID for OCI Data Science notebook/job runtime permissions"
-  value       = var.create_project_iam_policies && (var.create_datascience_job || var.create_datascience_notebook) ? oci_identity_policy.datascience_runtime[0].id : null
+  value       = var.create_project_iam_policies ? oci_identity_policy.datascience_runtime[0].id : null
 }
 
 output "object_storage_namespace" {
@@ -146,6 +146,22 @@ output "model_backup_bucket_name" {
 output "model_backup_bucket_id" {
   description = "Object Storage model backup bucket OCID"
   value       = var.create_object_storage_buckets ? oci_objectstorage_bucket.model_backups[0].id : null
+}
+
+output "mlflow_artifact_bucket_name" {
+  description = "Object Storage bucket name configured for MLflow artifacts"
+  value       = var.mlflow_artifact_bucket_name
+}
+
+output "mlflow_artifact_bucket_id" {
+  description = "Object Storage MLflow artifact bucket OCID"
+  value       = var.create_mlflow_artifact_bucket ? oci_objectstorage_bucket.mlflow_artifacts[0].id : null
+}
+
+output "mlflow_artifact_root" {
+  description = "MLflow artifact root URI currently configured on the MLflow server"
+  value       = local.mlflow_use_object_storage_artifacts_effective ? local.mlflow_artifact_root : "mlflow-artifacts:/"
+  sensitive   = true
 }
 
 output "node_image_ocid" {

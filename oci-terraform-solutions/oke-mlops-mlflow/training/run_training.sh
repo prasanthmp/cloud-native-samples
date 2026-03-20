@@ -5,7 +5,7 @@ python3 -m pip install --upgrade pip
 pip3 install -r training/requirements.txt
 
 python3 training/train.py \
-  --mlflow-tracking-uri "${MLFLOW_TRACKING_URI:-http://129.80.216.101}" \
+  --mlflow-tracking-uri "${MLFLOW_TRACKING_URI:-}" \
   --experiment-name "${MLFLOW_EXPERIMENT_NAME:-basic-iris-training-pipeline}" \
   --registered-model-name "${MLFLOW_REGISTERED_MODEL_NAME:-iris-logreg-model}" \
   --object-storage-namespace "${OBJECT_STORAGE_NAMESPACE:-}" \

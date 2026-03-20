@@ -33,6 +33,16 @@ data "oci_objectstorage_namespace" "this" {
   compartment_id = var.tenancy_ocid
 }
 
+data "oci_secrets_secretbundle" "mlflow_s3_access_key_id" {
+  count     = var.mlflow_s3_access_key_id_secret_ocid != null ? 1 : 0
+  secret_id = var.mlflow_s3_access_key_id_secret_ocid
+}
+
+data "oci_secrets_secretbundle" "mlflow_s3_secret_access_key" {
+  count     = var.mlflow_s3_secret_access_key_secret_ocid != null ? 1 : 0
+  secret_id = var.mlflow_s3_secret_access_key_secret_ocid
+}
+
 data "oci_containerengine_cluster_option" "oke" {
   cluster_option_id = "all"
 }
@@ -271,7 +281,14 @@ locals {
   ocir_training_repository_compartment_id_value = var.ocir_training_repository_compartment_id != null ? var.ocir_training_repository_compartment_id : var.compartment_id
   ocir_serving_repository_compartment_id_value  = var.ocir_serving_repository_compartment_id != null ? var.ocir_serving_repository_compartment_id : var.compartment_id
   object_storage_bucket_compartment_id_value    = var.object_storage_bucket_compartment_id != null ? var.object_storage_bucket_compartment_id : var.compartment_id
+  mlflow_artifact_bucket_compartment_id_value   = var.mlflow_artifact_bucket_compartment_id != null ? var.mlflow_artifact_bucket_compartment_id : var.compartment_id
   object_storage_namespace_value                = var.object_storage_namespace != null ? var.object_storage_namespace : data.oci_objectstorage_namespace.this.namespace
+  mlflow_s3_access_key_id_from_secret           = var.mlflow_s3_access_key_id_secret_ocid != null ? base64decode(data.oci_secrets_secretbundle.mlflow_s3_access_key_id[0].secret_bundle_content[0].content) : null
+  mlflow_s3_secret_access_key_from_secret       = var.mlflow_s3_secret_access_key_secret_ocid != null ? base64decode(data.oci_secrets_secretbundle.mlflow_s3_secret_access_key[0].secret_bundle_content[0].content) : null
+  mlflow_s3_access_key_id_value                 = var.mlflow_s3_access_key_id != null ? var.mlflow_s3_access_key_id : local.mlflow_s3_access_key_id_from_secret
+  mlflow_s3_secret_access_key_value             = var.mlflow_s3_secret_access_key != null ? var.mlflow_s3_secret_access_key : local.mlflow_s3_secret_access_key_from_secret
+  mlflow_tracking_uri_runtime                   = local.mlflow_host != "" ? "http://${local.mlflow_host}" : null
+  datascience_mlflow_runtime_env                = local.mlflow_tracking_uri_runtime != null ? { MLFLOW_TRACKING_URI = local.mlflow_tracking_uri_runtime } : {}
   datascience_object_storage_env = {
     OBJECT_STORAGE_NAMESPACE   = local.object_storage_namespace_value
     DATASET_BUCKET_NAME        = var.object_storage_dataset_bucket_name
@@ -280,6 +297,7 @@ locals {
     MODEL_BACKUP_OBJECT_PREFIX = var.object_storage_model_backup_prefix
   }
   datascience_job_environment_variables_merged = merge(
+    local.datascience_mlflow_runtime_env,
     var.datascience_job_environment_variables,
     local.datascience_object_storage_env
   )
@@ -317,6 +335,15 @@ resource "oci_objectstorage_bucket" "model_backups" {
   storage_tier   = "Standard"
 }
 
+resource "oci_objectstorage_bucket" "mlflow_artifacts" {
+  count          = var.create_mlflow_artifact_bucket ? 1 : 0
+  compartment_id = local.mlflow_artifact_bucket_compartment_id_value
+  namespace      = local.object_storage_namespace_value
+  name           = var.mlflow_artifact_bucket_name
+  access_type    = "NoPublicAccess"
+  storage_tier   = "Standard"
+}
+
 resource "oci_datascience_project" "mlflow_test" {
   count          = var.create_datascience_notebook ? 1 : 0
   compartment_id = var.compartment_id
@@ -338,7 +365,7 @@ resource "oci_datascience_notebook_session" "mlflow_test" {
 }
 
 resource "oci_datascience_job" "training" {
-  count                   = var.create_datascience_job ? 1 : 0
+  count                   = 1
   compartment_id          = var.compartment_id
   project_id              = local.datascience_project_id
   display_name            = var.datascience_job_name
