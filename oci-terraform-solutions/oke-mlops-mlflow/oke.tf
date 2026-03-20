@@ -75,15 +75,9 @@ resource "kubernetes_deployment_v1" "mlflow" {
           name  = "mlflow"
           image = var.mlflow_image
 
-          command = ["mlflow"]
+          command = ["/bin/sh", "-c"]
           args = [
-            "server",
-            "--host", "0.0.0.0",
-            "--port", "5000",
-            "--backend-store-uri", "sqlite:///mlflow.db",
-            "--serve-artifacts",
-            "--artifacts-destination", local.mlflow_use_object_storage_artifacts_effective ? local.mlflow_artifact_root : "/mlflow/artifacts",
-            "--default-artifact-root", local.mlflow_use_object_storage_artifacts_effective ? local.mlflow_artifact_root : "mlflow-artifacts:/"
+            "pip install --no-cache-dir boto3 && exec mlflow server --host 0.0.0.0 --port 5000 --backend-store-uri sqlite:///mlflow.db --serve-artifacts --artifacts-destination '${local.mlflow_use_object_storage_artifacts_effective ? local.mlflow_artifact_root : "/mlflow/artifacts"}' --default-artifact-root '${local.mlflow_use_object_storage_artifacts_effective ? local.mlflow_artifact_root : "mlflow-artifacts:/"}'"
           ]
 
           port {

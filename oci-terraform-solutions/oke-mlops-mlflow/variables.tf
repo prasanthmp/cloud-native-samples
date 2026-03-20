@@ -152,7 +152,7 @@ variable "datascience_job_block_storage_size_gb" {
 variable "datascience_job_command_line_arguments" {
   type        = string
   description = "Command line arguments for OCI Data Science Job"
-  default     = "bash training/run_training.sh"
+  default     = "bash /app/training/run_training.sh"
 }
 
 variable "datascience_job_environment_variables" {

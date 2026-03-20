@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-python3 -m pip install --upgrade pip
-pip3 install -r training/requirements.txt
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+APP_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
-python3 training/train.py \
+python3 "${APP_DIR}/training/train.py" \
   --mlflow-tracking-uri "${MLFLOW_TRACKING_URI:-}" \
   --experiment-name "${MLFLOW_EXPERIMENT_NAME:-basic-iris-training-pipeline}" \
   --registered-model-name "${MLFLOW_REGISTERED_MODEL_NAME:-iris-logreg-model}" \
