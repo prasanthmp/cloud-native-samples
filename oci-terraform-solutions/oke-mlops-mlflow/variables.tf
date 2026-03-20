@@ -171,6 +171,50 @@ variable "datascience_job_environment_variables" {
   }
 }
 
+variable "create_object_storage_buckets" {
+  type        = bool
+  description = "If true, creates Object Storage buckets for dataset storage and model backups."
+  default     = true
+}
+
+variable "object_storage_bucket_compartment_id" {
+  type        = string
+  description = "Compartment OCID where Object Storage buckets are created. If null, uses var.compartment_id."
+  default     = null
+  nullable    = true
+}
+
+variable "object_storage_namespace" {
+  type        = string
+  description = "Optional Object Storage namespace override for Data Science job env vars. If null, Terraform discovers the tenancy namespace."
+  default     = null
+  nullable    = true
+}
+
+variable "object_storage_dataset_bucket_name" {
+  type        = string
+  description = "Object Storage bucket name for training datasets."
+  default     = "mlops-datasets"
+}
+
+variable "object_storage_dataset_object_name" {
+  type        = string
+  description = "Object name (path) of the training dataset inside the dataset bucket."
+  default     = "datasets/iris.csv"
+}
+
+variable "object_storage_model_backup_bucket_name" {
+  type        = string
+  description = "Object Storage bucket name for model backup files."
+  default     = "mlops-model-backups"
+}
+
+variable "object_storage_model_backup_prefix" {
+  type        = string
+  description = "Object prefix used for model backups."
+  default     = "models"
+}
+
 variable "create_devops_pipeline" {
   type        = bool
   description = "If true, creates OCI DevOps project, build pipeline, build stage, and GitHub trigger."

@@ -123,6 +123,31 @@ output "policy_datascience_runtime_id" {
   value       = var.create_project_iam_policies && (var.create_datascience_job || var.create_datascience_notebook) ? oci_identity_policy.datascience_runtime[0].id : null
 }
 
+output "object_storage_namespace" {
+  description = "Object Storage namespace used by dataset and model backup integration"
+  value       = local.object_storage_namespace_value
+}
+
+output "dataset_bucket_name" {
+  description = "Object Storage bucket name used for datasets"
+  value       = var.object_storage_dataset_bucket_name
+}
+
+output "dataset_bucket_id" {
+  description = "Object Storage dataset bucket OCID"
+  value       = var.create_object_storage_buckets ? oci_objectstorage_bucket.datasets[0].id : null
+}
+
+output "model_backup_bucket_name" {
+  description = "Object Storage bucket name used for model backups"
+  value       = var.object_storage_model_backup_bucket_name
+}
+
+output "model_backup_bucket_id" {
+  description = "Object Storage model backup bucket OCID"
+  value       = var.create_object_storage_buckets ? oci_objectstorage_bucket.model_backups[0].id : null
+}
+
 output "node_image_ocid" {
   description = "Node image OCID used by the node pool"
   value       = var.node_image_ocid

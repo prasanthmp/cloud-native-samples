@@ -29,6 +29,10 @@ data "oci_identity_availability_domains" "ads" {
   compartment_id = var.tenancy_ocid
 }
 
+data "oci_objectstorage_namespace" "this" {
+  compartment_id = var.tenancy_ocid
+}
+
 data "oci_containerengine_cluster_option" "oke" {
   cluster_option_id = "all"
 }
@@ -266,6 +270,19 @@ locals {
   datascience_project_id                        = var.create_datascience_notebook ? oci_datascience_project.mlflow_test[0].id : var.existing_datascience_project_id
   ocir_training_repository_compartment_id_value = var.ocir_training_repository_compartment_id != null ? var.ocir_training_repository_compartment_id : var.compartment_id
   ocir_serving_repository_compartment_id_value  = var.ocir_serving_repository_compartment_id != null ? var.ocir_serving_repository_compartment_id : var.compartment_id
+  object_storage_bucket_compartment_id_value    = var.object_storage_bucket_compartment_id != null ? var.object_storage_bucket_compartment_id : var.compartment_id
+  object_storage_namespace_value                = var.object_storage_namespace != null ? var.object_storage_namespace : data.oci_objectstorage_namespace.this.namespace
+  datascience_object_storage_env = {
+    OBJECT_STORAGE_NAMESPACE   = local.object_storage_namespace_value
+    DATASET_BUCKET_NAME        = var.object_storage_dataset_bucket_name
+    DATASET_OBJECT_NAME        = var.object_storage_dataset_object_name
+    MODEL_BACKUP_BUCKET_NAME   = var.object_storage_model_backup_bucket_name
+    MODEL_BACKUP_OBJECT_PREFIX = var.object_storage_model_backup_prefix
+  }
+  datascience_job_environment_variables_merged = merge(
+    var.datascience_job_environment_variables,
+    local.datascience_object_storage_env
+  )
 }
 
 resource "oci_artifacts_container_repository" "training" {
@@ -280,6 +297,24 @@ resource "oci_artifacts_container_repository" "serving" {
   compartment_id = local.ocir_serving_repository_compartment_id_value
   display_name   = var.ocir_serving_repository_name
   is_public      = false
+}
+
+resource "oci_objectstorage_bucket" "datasets" {
+  count          = var.create_object_storage_buckets ? 1 : 0
+  compartment_id = local.object_storage_bucket_compartment_id_value
+  namespace      = local.object_storage_namespace_value
+  name           = var.object_storage_dataset_bucket_name
+  access_type    = "NoPublicAccess"
+  storage_tier   = "Standard"
+}
+
+resource "oci_objectstorage_bucket" "model_backups" {
+  count          = var.create_object_storage_buckets ? 1 : 0
+  compartment_id = local.object_storage_bucket_compartment_id_value
+  namespace      = local.object_storage_namespace_value
+  name           = var.object_storage_model_backup_bucket_name
+  access_type    = "NoPublicAccess"
+  storage_tier   = "Standard"
 }
 
 resource "oci_datascience_project" "mlflow_test" {
@@ -312,7 +347,7 @@ resource "oci_datascience_job" "training" {
   job_configuration_details {
     job_type               = "DEFAULT"
     command_line_arguments = var.datascience_job_command_line_arguments
-    environment_variables  = var.datascience_job_environment_variables
+    environment_variables  = local.datascience_job_environment_variables_merged
   }
 
   job_environment_configuration_details {
