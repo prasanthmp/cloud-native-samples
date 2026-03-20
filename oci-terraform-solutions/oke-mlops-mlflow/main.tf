@@ -393,4 +393,10 @@ resource "oci_datascience_job" "training" {
       memory_in_gbs = var.datascience_job_memory_gb
     }
   }
+
+  job_log_configuration_details {
+    enable_logging           = true
+    enable_auto_log_creation = true
+    log_group_id             = var.datascience_job_log_group_id
+  }
 }

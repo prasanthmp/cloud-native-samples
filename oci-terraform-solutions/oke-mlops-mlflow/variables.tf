@@ -165,6 +165,13 @@ variable "datascience_job_environment_variables" {
   }
 }
 
+variable "datascience_job_log_group_id" {
+  type        = string
+  description = "OCI Logging log group OCID used for Data Science job run logs."
+  default     = null
+  nullable    = true
+}
+
 variable "create_object_storage_buckets" {
   type        = bool
   description = "If true, creates Object Storage buckets for dataset storage and model backups."
