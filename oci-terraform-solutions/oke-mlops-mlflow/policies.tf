@@ -44,6 +44,9 @@ resource "oci_identity_policy" "datascience_runtime" {
 
   statements = [
     "Allow any-user to manage all-resources in compartment id ${var.compartment_id} where all {request.principal.type = 'datasciencejobrun'}",
-    "Allow any-user to manage all-resources in compartment id ${var.compartment_id} where all {request.principal.type = 'datasciencenotebooksession'}"
+    "Allow any-user to manage all-resources in compartment id ${var.compartment_id} where all {request.principal.type = 'datasciencenotebooksession'}",
+    "Allow any-user to read log-groups in compartment id ${var.compartment_id} where all {request.principal.type = 'datasciencejobrun'}",
+    "Allow any-user to manage logs in compartment id ${var.compartment_id} where all {request.principal.type = 'datasciencejobrun'}",
+    "Allow any-user to use log-content in compartment id ${var.compartment_id} where all {request.principal.type = 'datasciencejobrun'}"
   ]
 }

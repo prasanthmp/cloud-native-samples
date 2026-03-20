@@ -289,6 +289,14 @@ locals {
   mlflow_s3_secret_access_key_value             = var.mlflow_s3_secret_access_key != null ? var.mlflow_s3_secret_access_key : local.mlflow_s3_secret_access_key_from_secret
   mlflow_tracking_uri_runtime                   = local.mlflow_host != "" ? "http://${local.mlflow_host}" : null
   datascience_mlflow_runtime_env                = local.mlflow_tracking_uri_runtime != null ? { MLFLOW_TRACKING_URI = local.mlflow_tracking_uri_runtime } : {}
+  datascience_mlflow_artifact_env = local.mlflow_use_object_storage_artifacts_effective ? {
+    AWS_ACCESS_KEY_ID                = local.mlflow_s3_access_key_id_value
+    AWS_SECRET_ACCESS_KEY            = local.mlflow_s3_secret_access_key_value
+    AWS_DEFAULT_REGION               = var.region
+    AWS_REQUEST_CHECKSUM_CALCULATION = "when_required"
+    AWS_RESPONSE_CHECKSUM_VALIDATION = "when_required"
+    MLFLOW_S3_ENDPOINT_URL           = local.mlflow_s3_endpoint
+  } : {}
   datascience_object_storage_env = {
     OBJECT_STORAGE_NAMESPACE   = local.object_storage_namespace_value
     DATASET_BUCKET_NAME        = var.object_storage_dataset_bucket_name
@@ -298,6 +306,7 @@ locals {
   }
   datascience_job_environment_variables_merged = merge(
     local.datascience_mlflow_runtime_env,
+    local.datascience_mlflow_artifact_env,
     var.datascience_job_environment_variables,
     local.datascience_object_storage_env
   )
