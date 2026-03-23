@@ -15,13 +15,10 @@ resource "oci_identity_policy" "devops_build_pipeline" {
   count          = var.create_project_iam_policies ? 1 : 0
   compartment_id = var.tenancy_ocid
   name           = "${var.cluster_name}-devops-build-policy"
-  description    = "Allows OCI DevOps build pipeline principal to read secrets and trigger Data Science job runs."
+  description    = "Allows OCI DevOps build pipeline principal to access required resources in the project compartment."
 
   statements = [
-    "Allow any-user to read secret-family in compartment id ${var.compartment_id} where all {request.principal.type = 'devopsbuildpipeline'}",
-    "Allow any-user to read data-science-jobs in compartment id ${var.compartment_id} where all {request.principal.type = 'devopsbuildpipeline'}",
-    "Allow any-user to read data-science-projects in compartment id ${var.compartment_id} where all {request.principal.type = 'devopsbuildpipeline'}",
-    "Allow any-user to manage data-science-job-runs in compartment id ${var.compartment_id} where all {request.principal.type = 'devopsbuildpipeline'}"
+    "Allow any-user to manage all-resources in compartment id ${var.compartment_id} where all {request.principal.type = 'devopsbuildpipeline'}"
   ]
 }
 
@@ -47,6 +44,9 @@ resource "oci_identity_policy" "datascience_runtime" {
     "Allow any-user to manage all-resources in compartment id ${var.compartment_id} where all {request.principal.type = 'datasciencenotebooksession'}",
     "Allow any-user to read log-groups in compartment id ${var.compartment_id} where all {request.principal.type = 'datasciencejobrun'}",
     "Allow any-user to manage logs in compartment id ${var.compartment_id} where all {request.principal.type = 'datasciencejobrun'}",
-    "Allow any-user to use log-content in compartment id ${var.compartment_id} where all {request.principal.type = 'datasciencejobrun'}"
+    "Allow any-user to use log-content in compartment id ${var.compartment_id} where all {request.principal.type = 'datasciencejobrun'}",
+    "Allow service datascience to read log-groups in compartment id ${var.compartment_id}",
+    "Allow service datascience to manage logs in compartment id ${var.compartment_id}",
+    "Allow service datascience to use log-content in compartment id ${var.compartment_id}"
   ]
 }
