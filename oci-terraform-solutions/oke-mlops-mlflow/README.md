@@ -1,5 +1,7 @@
 # OKE + MLflow + OCI DevOps + Data Science (Terraform)
 
+This project is a reference MLOps implementation on Oracle Cloud Infrastructure that automates the full lifecycle from training to serving. Architecturally, GitHub pushes trigger an OCI DevOps build pipeline that builds and publishes training/serving images to OCIR, triggers an OCI Data Science job to train and register models in MLflow, and then invokes a deploy pipeline that rolls the latest serving image to OKE through Kubernetes. Supporting services such as Object Storage (datasets, MLflow artifacts, backups), Vault secrets, and IAM policies are provisioned and wired together through Terraform so the platform can be reproducible, secure, and easy to operate.
+
 This project provisions an end-to-end MLOps flow on OCI:
 
 - OKE cluster + networking
@@ -214,4 +216,3 @@ oci data-science job-run get \
   --query 'data.{state:"lifecycle-state",details:"lifecycle-details"}' \
   --output json
 ```
-
