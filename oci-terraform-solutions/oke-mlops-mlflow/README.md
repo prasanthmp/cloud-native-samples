@@ -220,6 +220,64 @@ Checks:
 terraform apply -var-file=terraform.tfvars
 ```
 
+### GitHub trigger does not start build pipeline
+
+Symptoms:
+- push to `main` does not start a build run
+- `oci devops build-run list ...` only shows `MANUAL` runs
+
+Checks:
+
+1. Confirm trigger is ACTIVE:
+
+```bash
+oci devops trigger get --trigger-id <trigger_ocid> --query 'data."lifecycle-state"' --raw-output
+```
+
+2. Confirm the GitHub webhook exists in your repo and points to the trigger listener URL:
+
+```bash
+oci devops trigger get --trigger-id <trigger_ocid> --query 'data."trigger-url"' --raw-output
+```
+
+Then check your GitHub repository webhooks for that URL.
+
+3. Validate connection health:
+
+```bash
+oci devops connection validate --connection-id <connection_ocid>
+```
+
+4. Confirm your commit matches trigger filters:
+- branch: `main`
+- changed files include:
+  - `oci-terraform-solutions/oke-mlops-mlflow/**`
+  - or `README.md`
+
+If webhook is missing, recreate the trigger/connection or add the webhook manually in GitHub using the trigger URL.
+
+### Serving `/predict` returns `{"detail":"Model not loaded"}`
+
+Common causes:
+1. No registered model exists in MLflow yet
+2. Serving image missing `boto3` (required for S3-compatible artifact download)
+3. Serving deployment missing Object Storage credential env vars
+
+Checks:
+
+```bash
+curl -sS "$MLFLOW_URL/api/2.0/mlflow/registered-models/search"
+kubectl -n mlflow logs deployment/mlflow-serving --tail=200
+```
+
+Expected serving env vars:
+- `AWS_ACCESS_KEY_ID`
+- `AWS_SECRET_ACCESS_KEY`
+- `AWS_DEFAULT_REGION`
+- `MLFLOW_S3_ENDPOINT_URL`
+
+These should come from `secret/mlflow-object-storage`.
+
 ### Serving pod image pull denied (OCIR)
 
 - Ensure repo exists and image tag exists.
