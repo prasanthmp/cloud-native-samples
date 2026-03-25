@@ -99,6 +99,26 @@ steps:
                 value: "$MLFLOW_MODEL_NAME"
               - name: MLFLOW_MODEL_STAGE
                 value: "$MLFLOW_MODEL_STAGE"
+              - name: AWS_ACCESS_KEY_ID
+                valueFrom:
+                  secretKeyRef:
+                    name: mlflow-object-storage
+                    key: AWS_ACCESS_KEY_ID
+              - name: AWS_SECRET_ACCESS_KEY
+                valueFrom:
+                  secretKeyRef:
+                    name: mlflow-object-storage
+                    key: AWS_SECRET_ACCESS_KEY
+              - name: AWS_DEFAULT_REGION
+                valueFrom:
+                  secretKeyRef:
+                    name: mlflow-object-storage
+                    key: AWS_DEFAULT_REGION
+              - name: MLFLOW_S3_ENDPOINT_URL
+                valueFrom:
+                  secretKeyRef:
+                    name: mlflow-object-storage
+                    key: MLFLOW_S3_ENDPOINT_URL
       EOF
 
       cat >/tmp/mlflow-serving-service.yaml <<EOF
