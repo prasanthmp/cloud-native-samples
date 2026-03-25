@@ -255,6 +255,57 @@ oci devops connection validate --connection-id <connection_ocid>
 
 If webhook is missing, recreate the trigger/connection or add the webhook manually in GitHub using the trigger URL.
 
+### Create OCI trigger and GitHub webhook (recommended flow)
+
+Use OCI DevOps to manage webhook registration automatically. This avoids payload URL/secret mismatch issues.
+
+1. In OCI Console, open:
+   - `Developer Services` -> `DevOps` -> your project
+2. Go to `Triggers` and create a new `GitHub` trigger.
+3. Select:
+   - the GitHub connection
+   - repository: `prasanthmp/cloud-native-samples`
+   - event: `PUSH`
+   - branch: `main`
+   - file filters:
+     - `oci-terraform-solutions/oke-mlops-mlflow/**`
+     - `README.md`
+4. Set action to trigger build pipeline:
+   - `mlflow-training-build-pipeline`
+5. Save trigger and confirm it is `ACTIVE`.
+6. Copy the secret and URL (Required for configuring GitHub webhook)
+7. Wait ~1 minute for OCI to register webhook in GitHub.
+
+Important:
+- Prefer OCI-managed webhook registration.
+- Avoid manual webhook edits unless required by policy.
+
+### If you must configure GitHub webhook manually
+
+Only do this if OCI cannot register webhook automatically and you have repo admin access.
+
+1. In GitHub repo settings, open `Webhooks`.
+2. Delete old/invalid OCI webhook entries first.
+3. Create webhook with:
+   - `Payload URL`: OCI trigger listener URL from OCI trigger details
+   - `Content type`: `application/json`
+   - `Secret`: trigger webhook secret (must match OCI; not your GitHub PAT)
+   - Events: `Just the push event`
+4. Save and test with a new push to `main`.
+
+Notes:
+- `GitHub PAT` is for OCI connection auth and is different from webhook `Secret`.
+- If OCI UI does not expose a secret, use OCI-managed webhook flow instead of manual webhook setup.
+
+### Common webhook errors
+
+- `Invalid payload URL or secret`:
+  - payload URL or webhook secret does not match trigger listener settings
+- `Unable to parse message body`:
+  - GitHub webhook content type is not `application/json`
+- Trigger ACTIVE but no build runs:
+  - check branch/path filters and webhook delivery status in GitHub
+
 ### Serving `/predict` returns `{"detail":"Model not loaded"}`
 
 Common causes:

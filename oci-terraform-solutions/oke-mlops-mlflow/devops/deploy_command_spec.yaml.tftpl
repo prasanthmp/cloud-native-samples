@@ -140,6 +140,7 @@ steps:
 
       kubectl apply -f /tmp/mlflow-serving-deployment.yaml
       kubectl apply -f /tmp/mlflow-serving-service.yaml
+      kubectl -n "$SERVING_NAMESPACE" rollout restart deployment/"$SERVING_DEPLOYMENT"
       kubectl -n "$SERVING_NAMESPACE" rollout status deployment/"$SERVING_DEPLOYMENT" --timeout=600s
       kubectl -n "$SERVING_NAMESPACE" get svc "$SERVING_SERVICE" -o wide
 
