@@ -58,7 +58,7 @@ def main():
     parser.add_argument(
         "--display",
         choices=["all"],
-        help="Display all items instead of top 5"
+        help="Display all items instead of latest"
     )
     args = parser.parse_args()
 
@@ -92,13 +92,13 @@ def main():
     cpu_families_to_show = [args.cpu] if args.cpu else grouped.keys()
 
     # Number of items to display per CPU family
-    max_display = None if args.display == "all" else 5
+    max_display = None if args.display == "all" else 1
 
     # Display message at the top
     if args.display == "all":
         print("Displaying all images...\n")
     else:
-        print("Displaying latest 5 images...\n")
+        print("Displaying latest image.\n")
 
     # Print output
     for cpu_family in cpu_families_to_show:

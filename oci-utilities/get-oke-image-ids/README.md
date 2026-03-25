@@ -39,12 +39,12 @@ python3 oci-utilities/get-oke-image-ids/oke-images.py
 Options:
 
 - `--cpu {x86,arm,gpu}` : Filter output to a specific CPU family.
-- `--display all` : Show all discovered image sources instead of the top 5 per CPU family.
+- `--display all` : Show all discovered image sources instead of the latest per CPU family.
 
 Examples:
 
 ```bash
-# show latest 5 entries for each CPU family (default)
+# show latest entries for each CPU family (default)
 python3 oci-utilities/get-oke-image-ids/oke-images.py
 
 # show only ARM images
@@ -66,7 +66,7 @@ The script prints a human-readable list grouped by CPU family. Each entry contai
 Sample output (truncated):
 
 ```
-Displaying latest 5 images...
+Displaying latest images...
 
 ===== Image FAMILY: X86 =====
 K8s: 1.26.1 | Region: iad
