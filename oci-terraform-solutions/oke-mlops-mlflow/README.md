@@ -83,9 +83,12 @@ Update required values in `terraform.tfvars`:
 - tenancy/user auth fields
 - `compartment_id`
 - `node_image_ocid`, `ssh_public_key_path`
-- `existing_datascience_project_id` (if reusing project)
+- Data Science project selection:
+  - `create_datascience_project = true` and `datascience_project_name`, or
+  - `create_datascience_project = false` and `datascience_project_id`
 - `datascience_job_container_image`
 - `datascience_job_log_group_id`
+- `object_storage_root_bucket_name` (single root bucket, for example `oke-mlops`)
 - GitHub/DevOps values:
   - `devops_repository_url`
   - `devops_github_access_token_secret_id` (or existing connection ID via variable)

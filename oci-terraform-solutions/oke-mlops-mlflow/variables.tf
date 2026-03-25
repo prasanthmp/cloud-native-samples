@@ -72,14 +72,32 @@ variable "node_pool_size" {
 
 variable "create_datascience_notebook" {
   type        = bool
-  description = "If true, creates an OCI Data Science project and notebook session for MLflow testing."
+  description = "If true, creates an OCI Data Science notebook session for MLflow testing."
+  default     = true
+}
+
+variable "create_datascience_project" {
+  type        = bool
+  description = "If true, creates an OCI Data Science project and uses it for jobs/notebooks."
   default     = true
 }
 
 variable "datascience_project_name" {
   type        = string
-  description = "OCI Data Science project display name. Used for project creation (when create_datascience_notebook=true) or lookup (when false)."
+  description = "OCI Data Science project display name used when creating a project."
   default     = "mlflow-test-project"
+}
+
+variable "datascience_project_id" {
+  type        = string
+  description = "Existing OCI Data Science project OCID to use when create_datascience_project=false."
+  default     = null
+  nullable    = true
+
+  validation {
+    condition     = var.create_datascience_project || var.datascience_project_id != null
+    error_message = "Set datascience_project_id when create_datascience_project is false."
+  }
 }
 
 variable "datascience_notebook_name" {
@@ -185,9 +203,15 @@ variable "object_storage_namespace" {
   nullable    = true
 }
 
+variable "object_storage_root_bucket_name" {
+  type        = string
+  description = "Root Object Storage bucket name used for datasets, model backups, and MLflow artifacts."
+  default     = "oke-mlops"
+}
+
 variable "object_storage_dataset_bucket_name" {
   type        = string
-  description = "Object Storage bucket name for training datasets."
+  description = "Deprecated: bucket name for training datasets. The module now uses object_storage_root_bucket_name."
   default     = "mlops-datasets"
 }
 
@@ -199,7 +223,7 @@ variable "object_storage_dataset_object_name" {
 
 variable "object_storage_model_backup_bucket_name" {
   type        = string
-  description = "Object Storage bucket name for model backup files."
+  description = "Deprecated: bucket name for model backups. The module now uses object_storage_root_bucket_name."
   default     = "mlops-model-backups"
 }
 
@@ -531,7 +555,7 @@ variable "create_mlflow_artifact_bucket" {
 
 variable "mlflow_artifact_bucket_name" {
   type        = string
-  description = "Object Storage bucket name used by MLflow artifact store."
+  description = "Deprecated: MLflow artifact bucket name. The module now uses object_storage_root_bucket_name."
   default     = "mlops-mlflow-artifacts"
 }
 

@@ -129,33 +129,33 @@ output "object_storage_namespace" {
 }
 
 output "dataset_bucket_name" {
-  description = "Object Storage bucket name used for datasets"
-  value       = var.object_storage_dataset_bucket_name
+  description = "Root Object Storage bucket name used for datasets, model backups, and MLflow artifacts"
+  value       = var.object_storage_root_bucket_name
 }
 
 output "dataset_bucket_id" {
-  description = "Object Storage dataset bucket OCID"
-  value       = var.create_object_storage_buckets ? oci_objectstorage_bucket.datasets[0].id : null
+  description = "Root Object Storage bucket OCID"
+  value       = local.create_root_object_storage_bucket ? oci_objectstorage_bucket.root[0].id : null
 }
 
 output "model_backup_bucket_name" {
-  description = "Object Storage bucket name used for model backups"
-  value       = var.object_storage_model_backup_bucket_name
+  description = "Root Object Storage bucket name used for model backups"
+  value       = var.object_storage_root_bucket_name
 }
 
 output "model_backup_bucket_id" {
-  description = "Object Storage model backup bucket OCID"
-  value       = var.create_object_storage_buckets ? oci_objectstorage_bucket.model_backups[0].id : null
+  description = "Root Object Storage bucket OCID (used for model backups)"
+  value       = local.create_root_object_storage_bucket ? oci_objectstorage_bucket.root[0].id : null
 }
 
 output "mlflow_artifact_bucket_name" {
-  description = "Object Storage bucket name configured for MLflow artifacts"
-  value       = var.mlflow_artifact_bucket_name
+  description = "Root Object Storage bucket name configured for MLflow artifacts"
+  value       = var.object_storage_root_bucket_name
 }
 
 output "mlflow_artifact_bucket_id" {
-  description = "Object Storage MLflow artifact bucket OCID"
-  value       = var.create_mlflow_artifact_bucket ? oci_objectstorage_bucket.mlflow_artifacts[0].id : null
+  description = "Root Object Storage bucket OCID (used for MLflow artifacts)"
+  value       = local.create_root_object_storage_bucket ? oci_objectstorage_bucket.root[0].id : null
 }
 
 output "mlflow_artifact_root" {

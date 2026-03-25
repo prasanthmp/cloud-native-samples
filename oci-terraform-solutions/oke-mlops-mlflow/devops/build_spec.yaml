@@ -7,7 +7,7 @@ env:
     PROJECT_ROOT: "oci-terraform-solutions/oke-mlops-mlflow"
     PACKAGE_DIR: dist
     PACKAGE_NAME: training_bundle.zip
-    COMPARTMENT_OCID: "ocid1.compartment.oc1..aaaaaaaakudebt2qkiq7rigx53xbsanwjxzr42tw46ktdmyejwotqsclgo6q"
+    COMPARTMENT_OCID: "ocid1.compartment.oc1..aaaaaaaavirskesajvpcys4ghf5rjavddlrknqbfzntv423y67o3mvjm54uq"
     OCIR_REGION_CODE: "iad"
     OCIR_NAMESPACE: "idxlfhtrvfsa"
     OCIR_TRAINING_REPOSITORY: "mlflow-training-test"

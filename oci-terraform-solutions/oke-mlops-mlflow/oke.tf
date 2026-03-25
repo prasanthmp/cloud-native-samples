@@ -15,7 +15,7 @@ provider "kubernetes" {
 
 locals {
   # MLflow uses S3 protocol for artifact I/O; this points to OCI Object Storage's S3-compatible endpoint.
-  mlflow_artifact_root                          = "s3://${var.mlflow_artifact_bucket_name}/${trim(var.mlflow_artifact_object_prefix, "/")}"
+  mlflow_artifact_root                          = "s3://${var.object_storage_root_bucket_name}/${trim(var.mlflow_artifact_object_prefix, "/")}"
   mlflow_s3_endpoint                            = "https://${local.object_storage_namespace_value}.compat.objectstorage.${var.region}.oraclecloud.com"
   mlflow_use_object_storage_artifacts_effective = var.mlflow_use_object_storage_artifacts && try(trimspace(local.mlflow_s3_access_key_id_value) != "", false) && try(trimspace(local.mlflow_s3_secret_access_key_value) != "", false)
 }

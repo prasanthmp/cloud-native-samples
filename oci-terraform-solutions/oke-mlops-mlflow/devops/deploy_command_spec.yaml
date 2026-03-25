@@ -9,7 +9,7 @@ steps:
       set -euo pipefail
 
       REGION="us-ashburn-1"
-      CLUSTER_ID="ocid1.cluster.oc1.iad.aaaaaaaahe4akrl6yb6kioqkdmhwg2gwbugyqeq53wd6ti6gfc34jhlq46lq"
+      CLUSTER_ID="ocid1.cluster.oc1.iad.aaaaaaaaaalj2kndcxwyc2j77uqrqazmji23k3icn7wvg6zuucjk3nvdsfka"
       SERVING_NAMESPACE="mlflow"
       SERVING_DEPLOYMENT="mlflow-serving"
       SERVING_SERVICE="mlflow-serving"

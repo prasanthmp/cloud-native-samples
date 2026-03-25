@@ -47,10 +47,6 @@ data "oci_containerengine_cluster_option" "oke" {
   cluster_option_id = "all"
 }
 
-data "oci_datascience_projects" "existing" {
-  compartment_id = var.compartment_id
-}
-
 locals {
   latest_kubernetes_version   = element(sort(data.oci_containerengine_cluster_option.oke.kubernetes_versions), length(data.oci_containerengine_cluster_option.oke.kubernetes_versions) - 1)
   selected_kubernetes_version = var.kubernetes_version != null ? var.kubernetes_version : local.latest_kubernetes_version
@@ -280,14 +276,11 @@ resource "oci_containerengine_node_pool" "default" {
 }
 
 locals {
-  datascience_subnet_id = var.datascience_subnet_id != null ? var.datascience_subnet_id : oci_core_subnet.datascience.id
-  datascience_project_ids_by_name = [
-    for project in data.oci_datascience_projects.existing.projects : project.id
-    if project.display_name == var.datascience_project_name
-  ]
-  datascience_project_id                        = var.create_datascience_notebook ? oci_datascience_project.mlflow_test[0].id : one(local.datascience_project_ids_by_name)
+  datascience_subnet_id                         = var.datascience_subnet_id != null ? var.datascience_subnet_id : oci_core_subnet.datascience.id
+  datascience_project_id                        = var.create_datascience_project ? oci_datascience_project.mlflow_test[0].id : var.datascience_project_id
   ocir_training_repository_compartment_id_value = var.ocir_training_repository_compartment_id != null ? var.ocir_training_repository_compartment_id : var.compartment_id
   ocir_serving_repository_compartment_id_value  = var.ocir_serving_repository_compartment_id != null ? var.ocir_serving_repository_compartment_id : var.compartment_id
+  create_root_object_storage_bucket             = var.create_object_storage_buckets || var.create_mlflow_artifact_bucket
   object_storage_bucket_compartment_id_value    = var.object_storage_bucket_compartment_id != null ? var.object_storage_bucket_compartment_id : var.compartment_id
   mlflow_artifact_bucket_compartment_id_value   = var.mlflow_artifact_bucket_compartment_id != null ? var.mlflow_artifact_bucket_compartment_id : var.compartment_id
   object_storage_namespace_value                = var.object_storage_namespace != null ? var.object_storage_namespace : data.oci_objectstorage_namespace.this.namespace
@@ -307,9 +300,9 @@ locals {
   } : {}
   datascience_object_storage_env = {
     OBJECT_STORAGE_NAMESPACE   = local.object_storage_namespace_value
-    DATASET_BUCKET_NAME        = var.object_storage_dataset_bucket_name
+    DATASET_BUCKET_NAME        = var.object_storage_root_bucket_name
     DATASET_OBJECT_NAME        = var.object_storage_dataset_object_name
-    MODEL_BACKUP_BUCKET_NAME   = var.object_storage_model_backup_bucket_name
+    MODEL_BACKUP_BUCKET_NAME   = var.object_storage_root_bucket_name
     MODEL_BACKUP_OBJECT_PREFIX = var.object_storage_model_backup_prefix
   }
   datascience_job_environment_variables_merged = merge(
@@ -334,35 +327,17 @@ resource "oci_artifacts_container_repository" "serving" {
   is_public      = false
 }
 
-resource "oci_objectstorage_bucket" "datasets" {
-  count          = var.create_object_storage_buckets ? 1 : 0
+resource "oci_objectstorage_bucket" "root" {
+  count          = local.create_root_object_storage_bucket ? 1 : 0
   compartment_id = local.object_storage_bucket_compartment_id_value
   namespace      = local.object_storage_namespace_value
-  name           = var.object_storage_dataset_bucket_name
-  access_type    = "NoPublicAccess"
-  storage_tier   = "Standard"
-}
-
-resource "oci_objectstorage_bucket" "model_backups" {
-  count          = var.create_object_storage_buckets ? 1 : 0
-  compartment_id = local.object_storage_bucket_compartment_id_value
-  namespace      = local.object_storage_namespace_value
-  name           = var.object_storage_model_backup_bucket_name
-  access_type    = "NoPublicAccess"
-  storage_tier   = "Standard"
-}
-
-resource "oci_objectstorage_bucket" "mlflow_artifacts" {
-  count          = var.create_mlflow_artifact_bucket ? 1 : 0
-  compartment_id = local.mlflow_artifact_bucket_compartment_id_value
-  namespace      = local.object_storage_namespace_value
-  name           = var.mlflow_artifact_bucket_name
+  name           = var.object_storage_root_bucket_name
   access_type    = "NoPublicAccess"
   storage_tier   = "Standard"
 }
 
 resource "oci_datascience_project" "mlflow_test" {
-  count          = var.create_datascience_notebook ? 1 : 0
+  count          = var.create_datascience_project ? 1 : 0
   compartment_id = var.compartment_id
   display_name   = var.datascience_project_name
   description    = "Project for testing MLflow on OKE from OCI Data Science notebook."
@@ -371,7 +346,7 @@ resource "oci_datascience_project" "mlflow_test" {
 resource "oci_datascience_notebook_session" "mlflow_test" {
   count          = var.create_datascience_notebook ? 1 : 0
   compartment_id = var.compartment_id
-  project_id     = oci_datascience_project.mlflow_test[0].id
+  project_id     = local.datascience_project_id
   display_name   = var.datascience_notebook_name
 
   notebook_session_configuration_details {
