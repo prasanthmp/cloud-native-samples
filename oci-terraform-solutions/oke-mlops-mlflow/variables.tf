@@ -76,16 +76,9 @@ variable "create_datascience_notebook" {
   default     = true
 }
 
-variable "existing_datascience_project_id" {
-  type        = string
-  description = "Existing OCI Data Science project OCID to use when create_datascience_notebook is false."
-  default     = null
-  nullable    = true
-}
-
 variable "datascience_project_name" {
   type        = string
-  description = "OCI Data Science project display name"
+  description = "OCI Data Science project display name. Used for project creation (when create_datascience_notebook=true) or lookup (when false)."
   default     = "mlflow-test-project"
 }
 

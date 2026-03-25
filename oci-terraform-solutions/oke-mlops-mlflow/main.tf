@@ -47,6 +47,10 @@ data "oci_containerengine_cluster_option" "oke" {
   cluster_option_id = "all"
 }
 
+data "oci_datascience_projects" "existing" {
+  compartment_id = var.compartment_id
+}
+
 locals {
   latest_kubernetes_version   = element(sort(data.oci_containerengine_cluster_option.oke.kubernetes_versions), length(data.oci_containerengine_cluster_option.oke.kubernetes_versions) - 1)
   selected_kubernetes_version = var.kubernetes_version != null ? var.kubernetes_version : local.latest_kubernetes_version
@@ -276,8 +280,12 @@ resource "oci_containerengine_node_pool" "default" {
 }
 
 locals {
-  datascience_subnet_id                         = var.datascience_subnet_id != null ? var.datascience_subnet_id : oci_core_subnet.datascience.id
-  datascience_project_id                        = var.create_datascience_notebook ? oci_datascience_project.mlflow_test[0].id : var.existing_datascience_project_id
+  datascience_subnet_id = var.datascience_subnet_id != null ? var.datascience_subnet_id : oci_core_subnet.datascience.id
+  datascience_project_ids_by_name = [
+    for project in data.oci_datascience_projects.existing.projects : project.id
+    if project.display_name == var.datascience_project_name
+  ]
+  datascience_project_id                        = var.create_datascience_notebook ? oci_datascience_project.mlflow_test[0].id : one(local.datascience_project_ids_by_name)
   ocir_training_repository_compartment_id_value = var.ocir_training_repository_compartment_id != null ? var.ocir_training_repository_compartment_id : var.compartment_id
   ocir_serving_repository_compartment_id_value  = var.ocir_serving_repository_compartment_id != null ? var.ocir_serving_repository_compartment_id : var.compartment_id
   object_storage_bucket_compartment_id_value    = var.object_storage_bucket_compartment_id != null ? var.object_storage_bucket_compartment_id : var.compartment_id
