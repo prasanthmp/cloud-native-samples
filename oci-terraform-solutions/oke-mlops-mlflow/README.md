@@ -55,13 +55,28 @@ This project provisions an end-to-end MLOps flow on OCI:
 - `kubectl` installed
 - OCI IAM/API key access to create resources in target tenancy/compartment
 
+Required secret keys/credentials for this stack:
+
+- OCI API signing key config (used by Terraform provider authentication):
+  - `tenancy_ocid`
+  - `user_ocid`
+  - `fingerprint`
+  - `private_key_path` (path to your OCI private key PEM)
+  - Optional if your key has a passphrase: `private_key_password`
+- GitHub access token secret (used by OCI DevOps source connection when not using an existing connection):
+  - `devops_github_access_token_secret_id` (Vault secret OCID)
+- OCIR auth token for build/push and deploy image pull secret:
+  - `devops_build_ocir_auth_token` (plain token) or
+  - `devops_build_ocir_auth_token_secret_ocid` (Vault secret OCID, recommended)
+- MLflow artifact storage credentials (OCI Object Storage S3-compatible):
+  - `mlflow_s3_access_key_id` or `mlflow_s3_access_key_id_secret_ocid`
+  - `mlflow_s3_secret_access_key` or `mlflow_s3_secret_access_key_secret_ocid`
+
+Do not commit real secrets or private keys. Use OCI Vault and/or a local `terraform.tfvars` that is excluded from version control.
+
 ## Configure
 
-Use the provided sample:
-
-```bash
-cp terraform.examples.tfvars terraform.tfvars
-```
+Create a local `terraform.tfvars` file in this directory and populate it with the required values below.
 
 Update required values in `terraform.tfvars`:
 
@@ -77,16 +92,16 @@ Update required values in `terraform.tfvars`:
 - OCIR values:
   - `devops_build_ocir_namespace`
   - `devops_build_ocir_username`
-  - `devops_build_ocir_auth_token_secret_ocid`
+  - `devops_build_ocir_auth_token` or `devops_build_ocir_auth_token_secret_ocid`
 - MLflow Object Storage secret OCIDs:
-  - `mlflow_s3_access_key_id_secret_ocid`
-  - `mlflow_s3_secret_access_key_secret_ocid`
+  - `mlflow_s3_access_key_id_secret_ocid` (or direct value `mlflow_s3_access_key_id`)
+  - `mlflow_s3_secret_access_key_secret_ocid` (or direct value `mlflow_s3_secret_access_key`)
 
 ## Deploy
 
 ```bash
 terraform init
-terraform apply -var-file=terraform.examples.tfvars
+terraform apply -var-file=terraform.tfvars
 ```
 
 ## Useful Outputs
@@ -199,7 +214,7 @@ Checks:
 4. Re-run:
 
 ```bash
-terraform apply -var-file=terraform.examples.tfvars
+terraform apply -var-file=terraform.tfvars
 ```
 
 ### Serving pod image pull denied (OCIR)
