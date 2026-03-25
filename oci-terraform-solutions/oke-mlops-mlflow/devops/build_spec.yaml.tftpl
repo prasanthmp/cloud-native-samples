@@ -83,6 +83,9 @@ steps:
         echo "training/ directory not found from OCI_PRIMARY_SOURCE_DIR=$${OCI_PRIMARY_SOURCE_DIR}"
         exit 1
       fi
+      export WAIT_FOR_JOB_RUN=true
+      export JOB_RUN_TIMEOUT_SECONDS=5400
+      export JOB_RUN_POLL_SECONDS=20
       bash scripts/trigger_datascience_job_run.sh
 outputArtifacts:
   - name: training_bundle

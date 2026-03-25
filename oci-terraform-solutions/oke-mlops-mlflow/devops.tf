@@ -274,6 +274,7 @@ resource "oci_devops_trigger" "github_push_build" {
 
       include {
         head_ref = "refs/heads/${var.devops_repository_branch}"
+        repository_name = trimsuffix(basename(var.devops_repository_url), ".git")
 
         dynamic "file_filter" {
           for_each = length(var.devops_trigger_file_paths) > 0 ? [1] : []

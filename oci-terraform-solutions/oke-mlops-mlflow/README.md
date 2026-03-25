@@ -66,8 +66,7 @@ Required secret keys/credentials for this stack:
 - GitHub access token secret (used by OCI DevOps source connection when not using an existing connection):
   - `devops_github_access_token_secret_id` (Vault secret OCID)
 - OCIR auth token for build/push and deploy image pull secret:
-  - `devops_build_ocir_auth_token` (plain token) or
-  - `devops_build_ocir_auth_token_secret_ocid` (Vault secret OCID, recommended)
+  - `devops_build_ocir_auth_token_secret_ocid` (Vault secret OCID)
 - MLflow artifact storage credentials (OCI Object Storage S3-compatible):
   - `mlflow_s3_access_key_id` or `mlflow_s3_access_key_id_secret_ocid`
   - `mlflow_s3_secret_access_key` or `mlflow_s3_secret_access_key_secret_ocid`
