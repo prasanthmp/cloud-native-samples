@@ -276,8 +276,9 @@ resource "oci_containerengine_node_pool" "default" {
 }
 
 locals {
+  create_datascience_project_enabled            = true
   datascience_subnet_id                         = var.datascience_subnet_id != null ? var.datascience_subnet_id : oci_core_subnet.datascience.id
-  datascience_project_id                        = var.create_datascience_project ? oci_datascience_project.mlflow_test[0].id : var.datascience_project_id
+  datascience_project_id                        = oci_datascience_project.mlflow_test[0].id
   ocir_training_repository_compartment_id_value = var.ocir_training_repository_compartment_id != null ? var.ocir_training_repository_compartment_id : var.compartment_id
   ocir_serving_repository_compartment_id_value  = var.ocir_serving_repository_compartment_id != null ? var.ocir_serving_repository_compartment_id : var.compartment_id
   create_root_object_storage_bucket             = var.create_object_storage_buckets || var.create_mlflow_artifact_bucket
@@ -306,11 +307,22 @@ locals {
     MODEL_BACKUP_OBJECT_PREFIX = var.object_storage_model_backup_prefix
   }
   datascience_job_environment_variables_merged = merge(
-    local.datascience_mlflow_runtime_env,
-    local.datascience_mlflow_artifact_env,
     var.datascience_job_environment_variables,
-    local.datascience_object_storage_env
+    local.datascience_object_storage_env,
+    local.datascience_mlflow_artifact_env,
+    local.datascience_mlflow_runtime_env
   )
+}
+
+resource "oci_logging_log_group" "datascience_training" {
+  count          = var.create_datascience_job_log_group && var.datascience_job_log_group_id == null ? 1 : 0
+  compartment_id = var.compartment_id
+  display_name   = var.datascience_job_log_group_name
+}
+
+locals {
+  managed_datascience_job_log_group_id   = var.create_datascience_job_log_group && var.datascience_job_log_group_id == null ? oci_logging_log_group.datascience_training[0].id : null
+  effective_datascience_job_log_group_id = var.datascience_job_log_group_id != null ? var.datascience_job_log_group_id : local.managed_datascience_job_log_group_id
 }
 
 resource "oci_artifacts_container_repository" "training" {
@@ -337,7 +349,7 @@ resource "oci_objectstorage_bucket" "root" {
 }
 
 resource "oci_datascience_project" "mlflow_test" {
-  count          = var.create_datascience_project ? 1 : 0
+  count          = local.create_datascience_project_enabled ? 1 : 0
   compartment_id = var.compartment_id
   display_name   = var.datascience_project_name
   description    = "Project for testing MLflow on OKE from OCI Data Science notebook."
@@ -389,6 +401,6 @@ resource "oci_datascience_job" "training" {
   job_log_configuration_details {
     enable_logging           = true
     enable_auto_log_creation = true
-    log_group_id             = var.datascience_job_log_group_id
+    log_group_id             = local.effective_datascience_job_log_group_id
   }
 }

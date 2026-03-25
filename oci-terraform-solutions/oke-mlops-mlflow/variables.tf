@@ -170,7 +170,6 @@ variable "datascience_job_environment_variables" {
   type        = map(string)
   description = "Environment variables for OCI Data Science Job"
   default = {
-    MLFLOW_TRACKING_URI          = "http://129.80.216.101"
     MLFLOW_EXPERIMENT_NAME       = "basic-iris-training-pipeline"
     MLFLOW_REGISTERED_MODEL_NAME = "iris-logreg-model"
   }
@@ -178,9 +177,21 @@ variable "datascience_job_environment_variables" {
 
 variable "datascience_job_log_group_id" {
   type        = string
-  description = "OCI Logging log group OCID used for Data Science job run logs."
+  description = "Optional existing OCI Logging log group OCID used for Data Science job run logs. If null and create_datascience_job_log_group=true, Terraform creates one."
   default     = null
   nullable    = true
+}
+
+variable "create_datascience_job_log_group" {
+  type        = bool
+  description = "If true, creates an OCI Logging log group for Data Science training job runs when datascience_job_log_group_id is not provided."
+  default     = true
+}
+
+variable "datascience_job_log_group_name" {
+  type        = string
+  description = "Display name for the Terraform-managed OCI Logging log group used by Data Science training job runs."
+  default     = "mlflow-training-datascience-logs"
 }
 
 variable "create_object_storage_buckets" {
@@ -335,6 +346,44 @@ variable "devops_notification_topic_name" {
   type        = string
   description = "Name of ONS notification topic created for OCI DevOps when devops_notification_topic_id is not provided."
   default     = "mlflow-training-devops-topic"
+}
+
+variable "devops_enable_project_logging" {
+  type        = bool
+  description = "If true, configures OCI Logging service logs for the DevOps project so build runs can execute."
+  default     = true
+}
+
+variable "devops_log_group_id" {
+  type        = string
+  description = "Optional existing OCI Logging log group OCID for DevOps project logs. If null, Terraform creates one."
+  default     = null
+  nullable    = true
+}
+
+variable "devops_log_group_name" {
+  type        = string
+  description = "Display name for the OCI Logging log group created for DevOps project logs."
+  default     = "mlflow-training-devops-logs"
+}
+
+variable "devops_project_log_id" {
+  type        = string
+  description = "Optional existing OCI Logging log OCID for DevOps project service logs. If null, Terraform creates one."
+  default     = null
+  nullable    = true
+}
+
+variable "devops_project_log_name" {
+  type        = string
+  description = "Display name for the OCI Logging service log attached to the DevOps project."
+  default     = "mlflow-training-devops-project-log"
+}
+
+variable "devops_project_log_retention_duration" {
+  type        = number
+  description = "Retention in days for the Terraform-managed DevOps project service log."
+  default     = 30
 }
 
 variable "devops_github_connection_id" {

@@ -9,7 +9,7 @@ from mlflow import MlflowClient
 from pydantic import BaseModel, Field
 
 
-MLFLOW_TRACKING_URI = os.getenv("MLFLOW_TRACKING_URI", "http://129.80.216.101")
+MLFLOW_TRACKING_URI = os.getenv("MLFLOW_TRACKING_URI", "http://mlflow.mlflow.svc.cluster.local")
 MODEL_NAME = os.getenv("MLFLOW_MODEL_NAME", "iris-logreg-model")
 MODEL_STAGE = os.getenv("MLFLOW_MODEL_STAGE", "Production")
 logger = logging.getLogger(__name__)

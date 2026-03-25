@@ -25,7 +25,7 @@ spec:
             - containerPort: 8000
           env:
             - name: MLFLOW_TRACKING_URI
-              value: "http://129.80.216.101"
+              value: "http://mlflow.mlflow.svc.cluster.local"
             - name: MLFLOW_MODEL_NAME
               value: "iris-logreg-model"
             - name: MLFLOW_MODEL_STAGE

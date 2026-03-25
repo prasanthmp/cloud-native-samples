@@ -38,6 +38,11 @@ output "datascience_job_id" {
   value       = oci_datascience_job.training[0].id
 }
 
+output "datascience_job_log_group_id" {
+  description = "Effective OCI Logging log group OCID used by Data Science training job runs"
+  value       = local.effective_datascience_job_log_group_id
+}
+
 output "ocir_training_repository_id" {
   description = "OCIR training repository OCID"
   value       = var.create_ocir_training_repository ? oci_artifacts_container_repository.training[0].id : null
@@ -66,6 +71,16 @@ output "devops_project_id" {
 output "devops_notification_topic_id" {
   description = "ONS topic OCID used by OCI DevOps project notifications"
   value       = local.devops_project_enabled ? local.devops_notification_topic_id : null
+}
+
+output "devops_log_group_id" {
+  description = "Effective OCI Logging log group OCID used for DevOps project logs"
+  value       = local.effective_devops_log_group_id
+}
+
+output "devops_project_log_id" {
+  description = "Effective OCI Logging log OCID used for DevOps project service logs"
+  value       = local.effective_devops_project_log_id
 }
 
 output "devops_github_connection_id" {

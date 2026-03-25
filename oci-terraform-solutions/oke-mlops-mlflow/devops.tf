@@ -47,8 +47,9 @@ resource "local_file" "devops_deploy_command_spec" {
 }
 
 locals {
-  devops_project_enabled       = true
-  devops_notification_topic_id = var.devops_notification_topic_id != null ? var.devops_notification_topic_id : oci_ons_notification_topic.devops[0].id
+  devops_project_enabled         = true
+  devops_project_logging_enabled = true
+  devops_notification_topic_id   = var.devops_notification_topic_id != null ? var.devops_notification_topic_id : oci_ons_notification_topic.devops[0].id
 }
 
 resource "oci_ons_notification_topic" "devops" {
@@ -66,6 +67,42 @@ resource "oci_devops_project" "mlflow_training" {
   notification_config {
     topic_id = local.devops_notification_topic_id
   }
+}
+
+resource "oci_logging_log_group" "devops" {
+  count          = local.devops_project_logging_enabled && var.devops_log_group_id == null ? 1 : 0
+  compartment_id = var.compartment_id
+  display_name   = var.devops_log_group_name
+}
+
+locals {
+  managed_devops_log_group_id   = local.devops_project_logging_enabled && var.devops_log_group_id == null ? oci_logging_log_group.devops[0].id : null
+  effective_devops_log_group_id = local.devops_project_logging_enabled ? (var.devops_log_group_id != null ? var.devops_log_group_id : local.managed_devops_log_group_id) : null
+}
+
+resource "oci_logging_log" "devops_project" {
+  count              = local.devops_project_logging_enabled && var.devops_project_log_id == null ? 1 : 0
+  display_name       = var.devops_project_log_name
+  log_group_id       = local.effective_devops_log_group_id
+  log_type           = "SERVICE"
+  is_enabled         = true
+  retention_duration = var.devops_project_log_retention_duration
+
+  configuration {
+    compartment_id = var.compartment_id
+
+    source {
+      service     = "devops"
+      resource    = oci_devops_project.mlflow_training[0].id
+      source_type = "OCISERVICE"
+      category    = "all"
+    }
+  }
+}
+
+locals {
+  managed_devops_project_log_id   = local.devops_project_logging_enabled && var.devops_project_log_id == null ? oci_logging_log.devops_project[0].id : null
+  effective_devops_project_log_id = local.devops_project_logging_enabled ? (var.devops_project_log_id != null ? var.devops_project_log_id : local.managed_devops_project_log_id) : null
 }
 
 resource "oci_devops_connection" "github" {
