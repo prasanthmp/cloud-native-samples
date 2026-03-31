@@ -98,7 +98,7 @@ def main():
     if args.display == "all":
         print("Displaying all images...\n")
     else:
-        print("Displaying latest image.\n")
+        print("Displaying latest images...\n")
 
     # Print output
     for cpu_family in cpu_families_to_show:
