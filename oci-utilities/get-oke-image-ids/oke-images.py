@@ -4,6 +4,8 @@ import re
 from collections import defaultdict
 import argparse
 
+GREEN = "\033[92m"
+RESET = "\033[0m"
 
 def detect_cpu_family(name: str) -> str:
     """Detect CPU type from source-name."""
@@ -106,9 +108,13 @@ def main():
         if not items:
             continue
         print(f"===== Image FAMILY: {cpu_family.upper()} =====")
+        # Updated print loop in main()
         for item in items[:max_display]:
             print(f"K8s: {item['kubernetes_version']} | Region: {item['region']}")
-            print(f"Image ID: {item['image_id']}")
+            
+            # This line now wraps the Image ID in Green
+            print(f"Image ID: {GREEN}{item['image_id']}{RESET}")
+            
             print(f"Source:   {item['source_name']}")
             print("")
 
