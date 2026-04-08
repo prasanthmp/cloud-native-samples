@@ -73,6 +73,11 @@ output "devops_notification_topic_id" {
   value       = local.devops_project_enabled ? local.devops_notification_topic_id : null
 }
 
+output "devops_notification_subscription_ids" {
+  description = "ONS subscription OCIDs created for DevOps notification emails"
+  value       = [for subscription in oci_ons_subscription.devops_email : subscription.id]
+}
+
 output "devops_log_group_id" {
   description = "Effective OCI Logging log group OCID used for DevOps project logs"
   value       = local.effective_devops_log_group_id

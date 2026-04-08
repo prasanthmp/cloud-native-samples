@@ -348,6 +348,12 @@ variable "devops_notification_topic_name" {
   default     = "mlflow-training-devops-topic"
 }
 
+variable "devops_notification_emails" {
+  type        = list(string)
+  description = "Email recipients to subscribe to the DevOps ONS topic for build/deploy notifications."
+  default     = []
+}
+
 variable "devops_enable_project_logging" {
   type        = bool
   description = "If true, configures OCI Logging service logs for the DevOps project so build runs can execute."

@@ -50,6 +50,7 @@ locals {
   devops_project_enabled         = true
   devops_project_logging_enabled = true
   devops_notification_topic_id   = var.devops_notification_topic_id != null ? var.devops_notification_topic_id : oci_ons_notification_topic.devops[0].id
+  devops_notification_emails     = toset([for email in var.devops_notification_emails : trimspace(email) if trimspace(email) != ""])
 }
 
 resource "oci_ons_notification_topic" "devops" {
@@ -67,6 +68,14 @@ resource "oci_devops_project" "mlflow_training" {
   notification_config {
     topic_id = local.devops_notification_topic_id
   }
+}
+
+resource "oci_ons_subscription" "devops_email" {
+  for_each       = local.devops_notification_emails
+  compartment_id = var.compartment_id
+  endpoint       = each.value
+  protocol       = "EMAIL"
+  topic_id       = local.devops_notification_topic_id
 }
 
 resource "oci_logging_log_group" "devops" {
@@ -273,7 +282,7 @@ resource "oci_devops_trigger" "github_push_build" {
       events         = ["PUSH"]
 
       include {
-        head_ref = "refs/heads/${var.devops_repository_branch}"
+        head_ref        = "refs/heads/${var.devops_repository_branch}"
         repository_name = trimsuffix(basename(var.devops_repository_url), ".git")
 
         dynamic "file_filter" {

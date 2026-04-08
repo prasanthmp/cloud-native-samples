@@ -65,6 +65,8 @@ Required secret keys/credentials for this stack:
   - Optional if your key has a passphrase: `private_key_password`
 - GitHub access token secret (used by OCI DevOps source connection when not using an existing connection):
   - `devops_github_access_token_secret_id` (Vault secret OCID)
+- DevOps email notifications (optional but recommended):
+  - `devops_notification_emails` (list of recipient email addresses)
 - OCIR auth token for build/push and deploy image pull secret:
   - `devops_build_ocir_auth_token_secret_ocid` (Vault secret OCID)
 - MLflow artifact storage credentials (OCI Object Storage S3-compatible):
@@ -90,6 +92,8 @@ Update required values in `terraform.tfvars`:
 - GitHub/DevOps values:
   - `devops_repository_url`
   - `devops_github_access_token_secret_id` (or existing connection ID via variable)
+  - Optional email notifications:
+    - `devops_notification_emails = ["you@example.com"]`
 - OCIR values:
   - `devops_build_ocir_namespace`
   - `devops_build_ocir_username`
@@ -114,9 +118,17 @@ terraform output datascience_job_id
 terraform output devops_build_pipeline_id
 terraform output devops_deploy_pipeline_id
 terraform output devops_github_trigger_id
+terraform output devops_notification_topic_id
+terraform output devops_notification_subscription_ids
 ```
 
 `serving_url` output is a helper command that waits for the external endpoint and prints full URL.
+
+DevOps notifications:
+
+- The DevOps project publishes events to the configured ONS topic.
+- Terraform subscribes each address in `devops_notification_emails` to that topic.
+- After `terraform apply`, each recipient must accept the OCI email subscription confirmation before alerts start arriving.
 
 `MLFLOW_TRACKING_URI` behavior:
 
