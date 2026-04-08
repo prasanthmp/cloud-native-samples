@@ -82,11 +82,10 @@ Update required values in `terraform.tfvars`:
 - tenancy/user auth fields
 - `compartment_id`
 - `node_image_ocid`, `ssh_public_key_path`
-- Data Science project selection:
-  - `create_datascience_project = true` and `datascience_project_name`, or
-  - `create_datascience_project = false` and `datascience_project_id`
+- Data Science project:
+  - `datascience_project_name` (project creation is enabled internally)
 - `datascience_job_container_image`
-- `datascience_job_log_group_id`
+- Optional: `datascience_job_log_group_id` (if omitted, Terraform creates and uses a log group by default)
 - `object_storage_root_bucket_name` (single root bucket, for example `oke-mlops`)
 - GitHub/DevOps values:
   - `devops_repository_url`
@@ -118,6 +117,11 @@ terraform output devops_github_trigger_id
 ```
 
 `serving_url` output is a helper command that waits for the external endpoint and prints full URL.
+
+`MLFLOW_TRACKING_URI` behavior:
+
+- Data Science training job gets `MLFLOW_TRACKING_URI` dynamically from the live MLflow service endpoint (`mlflow_url` output), not from a hardcoded IP.
+- Serving app reads `MLFLOW_TRACKING_URI` from environment (set by deploy pipeline). If not set, it falls back to `http://mlflow.mlflow.svc.cluster.local`.
 
 ## Manual Ops Commands
 
@@ -153,6 +157,64 @@ export OCIR_REPOSITORY="mlflow-serving"
 export OCIR_USERNAME="<namespace>/<username>"
 export OCIR_AUTH_TOKEN="<token>" # or use OCIR_AUTH_TOKEN_SECRET_OCID
 bash scripts/build_and_push_serving_ocir_image.sh
+```
+
+## Application Overview and Validation
+
+This application implements a practical MLOps loop: model training publishes metrics and model versions to MLflow, and the serving API loads a promoted model to provide real-time predictions. The deployment is exposed through a Kubernetes service (`mlflow-serving`) in the `mlflow` namespace, while MLflow provides the shared model source of truth across training and inference.
+
+At runtime, the application predicts the Iris flower type from four input parameters: sepal length, sepal width, petal length, and petal width.
+
+From an operator perspective, there are two runtime endpoints to validate after deployment:
+
+- `GET /health`: confirms service readiness and shows loaded model metadata
+- `POST /predict`: runs inference on numeric feature vectors and returns predicted class values
+
+The model is trained on the Iris dataset. Each record has four numeric features in this exact order: sepal length (cm), sepal width (cm), petal length (cm), and petal width (cm). The serving endpoint expects the same order for every input row.
+
+`/predict` input format is JSON with an `inputs` key containing a 2D array. Each inner array is one sample with 4 numeric values. Example:
+
+```json
+{"inputs": [[6.0, 2.9, 4.5, 1.5], [5.1, 3.5, 1.4, 0.2]]}
+```
+
+`/predict` response returns the loaded `model_uri` and a `predictions` array. Each output number is the flower type predicted by the model. Each prediction is a class index for the corresponding input row: `0 = setosa`, `1 = versicolor`, `2 = virginica`. In simple terms, if you send 3 rows, you get 3 outputs in the same order (first output for first row, second for second, and so on).
+
+Use the following workflow to validate the app end-to-end:
+
+1. Resolve service URL and set `BASE_URL`:
+
+```bash
+IP=$(kubectl -n mlflow get svc mlflow-serving -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+if [ -z "$IP" ]; then
+  HOST=$(kubectl -n mlflow get svc mlflow-serving -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+  BASE_URL="http://$HOST"
+else
+  BASE_URL="http://$IP"
+fi
+echo "$BASE_URL"
+```
+
+2. Verify service health:
+
+```bash
+curl -sS "$BASE_URL/health"
+```
+
+3. Run a prediction request:
+
+```bash
+curl -sS -X POST "$BASE_URL/predict" \
+  -H "Content-Type: application/json" \
+  -d '{"inputs": [[6.0, 2.9, 4.5, 1.5]]}'
+```
+
+4. Optional multi-row test:
+
+```bash
+curl -sS -X POST "$BASE_URL/predict" \
+  -H "Content-Type: application/json" \
+  -d '{"inputs": [[5.1,3.5,1.4,0.2],[6.0,2.9,4.5,1.5],[6.9,3.1,5.4,2.1]]}'
 ```
 
 ## Test Serving Endpoint
@@ -209,11 +271,12 @@ Error:
 
 Checks:
 
-1. Confirm `datascience_job_log_group_id` exists and is ACTIVE.
-2. Confirm job and log group are in expected region/compartment.
-3. Ensure policies in `policies.tf` are applied:
+1. If you set `datascience_job_log_group_id`, confirm it exists and is ACTIVE.
+2. If you do not set `datascience_job_log_group_id`, Terraform creates a managed log group automatically.
+3. Confirm job and log group are in expected region/compartment.
+4. Ensure policies in `policies.tf` are applied:
    - Data Science runtime and DevOps build principal permissions.
-4. Re-run:
+5. Re-run:
 
 ```bash
 terraform apply -var-file=terraform.tfvars
