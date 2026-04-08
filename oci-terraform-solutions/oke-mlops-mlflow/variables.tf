@@ -31,7 +31,7 @@ variable "compartment_id" {
 variable "cluster_name" {
   type        = string
   description = "OKE cluster name"
-  default     = "mlflow-oke"
+  default     = "mlops-oke-cluster"
 }
 
 variable "kubernetes_version" {
@@ -85,7 +85,7 @@ variable "create_datascience_project" {
 variable "datascience_project_name" {
   type        = string
   description = "OCI Data Science project display name used when creating a project."
-  default     = "mlflow-test-project"
+  default     = "mlops-project"
 }
 
 variable "datascience_project_id" {
@@ -103,7 +103,7 @@ variable "datascience_project_id" {
 variable "datascience_notebook_name" {
   type        = string
   description = "OCI Data Science notebook session display name"
-  default     = "mlflow-test-notebook"
+  default     = "mlops-mlflow-notebook"
 }
 
 variable "datascience_notebook_shape" {
@@ -121,7 +121,7 @@ variable "datascience_notebook_block_storage_size_gb" {
 variable "datascience_job_name" {
   type        = string
   description = "OCI Data Science job display name"
-  default     = "mlflow-training-job"
+  default     = "mlops-training-job"
 }
 
 variable "datascience_job_delete_related_job_runs" {
@@ -133,7 +133,7 @@ variable "datascience_job_delete_related_job_runs" {
 variable "datascience_job_container_image" {
   type        = string
   description = "Container image for OCI Data Science Job (OCIR image recommended)"
-  default     = "iad.ocir.io/replace-me/mlflow-training:latest"
+  default     = "iad.ocir.io/replace-me/mlops-training:latest"
 }
 
 variable "datascience_job_shape_name" {
@@ -191,7 +191,7 @@ variable "create_datascience_job_log_group" {
 variable "datascience_job_log_group_name" {
   type        = string
   description = "Display name for the Terraform-managed OCI Logging log group used by Data Science training job runs."
-  default     = "mlflow-training-datascience-logs"
+  default     = "mlops-training-datascience-logs"
 }
 
 variable "create_object_storage_buckets" {
@@ -217,7 +217,7 @@ variable "object_storage_namespace" {
 variable "object_storage_root_bucket_name" {
   type        = string
   description = "Root Object Storage bucket name used for datasets, model backups, and MLflow artifacts."
-  default     = "oke-mlops"
+  default     = "oci-mlops"
 }
 
 variable "object_storage_dataset_bucket_name" {
@@ -247,19 +247,19 @@ variable "object_storage_model_backup_prefix" {
 variable "devops_project_name" {
   type        = string
   description = "OCI DevOps project name"
-  default     = "mlflow-training-devops"
+  default     = "mlops-training-devops"
 }
 
 variable "devops_build_pipeline_name" {
   type        = string
   description = "OCI DevOps build pipeline display name"
-  default     = "mlflow-training-build-pipeline"
+  default     = "mlops-training-build-pipeline"
 }
 
 variable "devops_build_stage_name" {
   type        = string
   description = "OCI DevOps build stage display name"
-  default     = "build-and-deploy-training"
+  default     = "mlops-build-stage"
 }
 
 variable "create_devops_deploy_pipeline" {
@@ -271,7 +271,7 @@ variable "create_devops_deploy_pipeline" {
 variable "devops_deploy_pipeline_name" {
   type        = string
   description = "OCI DevOps deploy pipeline display name for serving deployment."
-  default     = "mlflow-serving-deploy-pipeline"
+  default     = "mlops-serving-deploy-pipeline"
 }
 
 variable "devops_deploy_command_artifact_name" {
@@ -283,7 +283,7 @@ variable "devops_deploy_command_artifact_name" {
 variable "devops_deploy_stage_name" {
   type        = string
   description = "OCI DevOps deploy stage display name for serving deployment."
-  default     = "deploy-serving-to-oke"
+  default     = "mlops-deploy-serving-to-oke"
 }
 
 variable "devops_trigger_deploy_stage_name" {
@@ -345,7 +345,7 @@ variable "devops_notification_topic_id" {
 variable "devops_notification_topic_name" {
   type        = string
   description = "Name of ONS notification topic created for OCI DevOps when devops_notification_topic_id is not provided."
-  default     = "mlflow-training-devops-topic"
+  default     = "mlops-training-devops-topic"
 }
 
 variable "devops_notification_emails" {
@@ -370,7 +370,7 @@ variable "devops_log_group_id" {
 variable "devops_log_group_name" {
   type        = string
   description = "Display name for the OCI Logging log group created for DevOps project logs."
-  default     = "mlflow-training-devops-logs"
+  default     = "mlops-training-devops-logs"
 }
 
 variable "devops_project_log_id" {
@@ -383,7 +383,7 @@ variable "devops_project_log_id" {
 variable "devops_project_log_name" {
   type        = string
   description = "Display name for the OCI Logging service log attached to the DevOps project."
-  default     = "mlflow-training-devops-project-log"
+  default     = "mlops-training-devops-project-log"
 }
 
 variable "devops_project_log_retention_duration" {
@@ -402,7 +402,7 @@ variable "devops_github_connection_id" {
 variable "devops_github_connection_name" {
   type        = string
   description = "Display name for the Terraform-managed OCI DevOps GitHub connection."
-  default     = "mlflow-training-github-connection"
+  default     = "mlops-training-github-connection"
 }
 
 variable "devops_github_access_token_secret_id" {
@@ -460,13 +460,13 @@ variable "devops_build_ocir_namespace" {
 variable "devops_build_ocir_repository" {
   type        = string
   description = "Training OCIR repository name passed into build_spec env."
-  default     = "mlflow-training-test"
+  default     = "mlops-training"
 }
 
 variable "devops_build_serving_ocir_repository" {
   type        = string
   description = "Serving OCIR repository name passed into build_spec env."
-  default     = "mlflow-serving"
+  default     = "mlops-serving"
 }
 
 variable "devops_build_image_tag" {
@@ -506,13 +506,13 @@ variable "serving_k8s_namespace" {
 variable "serving_k8s_deployment_name" {
   type        = string
   description = "Kubernetes deployment name for serving API."
-  default     = "mlflow-serving"
+  default     = "mlops-serving"
 }
 
 variable "serving_k8s_service_name" {
   type        = string
   description = "Kubernetes service name for serving API."
-  default     = "mlflow-serving"
+  default     = "mlops-serving"
 }
 
 variable "serving_mlflow_tracking_uri" {
@@ -549,7 +549,7 @@ variable "create_ocir_training_repository" {
 variable "ocir_training_repository_name" {
   type        = string
   description = "OCIR repository name to create for training images."
-  default     = "mlflow-training-test"
+  default     = "mlops-training"
 }
 
 variable "ocir_training_repository_compartment_id" {
@@ -568,7 +568,7 @@ variable "create_ocir_serving_repository" {
 variable "ocir_serving_repository_name" {
   type        = string
   description = "OCIR repository name to create for serving images."
-  default     = "mlflow-serving"
+  default     = "mlops-serving"
 }
 
 variable "ocir_serving_repository_compartment_id" {
