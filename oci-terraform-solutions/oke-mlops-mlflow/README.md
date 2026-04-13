@@ -1,5 +1,9 @@
 # OKE + MLflow + OCI DevOps + Data Science (Terraform)
 
+This reference implementation demonstrates how to run a practical MLOps platform on Oracle Cloud Infrastructure using Terraform as the control plane. It connects model training, tracking, artifact management, and serving into one automated lifecycle so teams can move from code changes to reproducible deployments with fewer manual handoffs.
+
+The stack is designed for operators and platform engineers who want repeatable infrastructure, centralized secrets handling, and CI/CD-driven model updates. GitHub pushes trigger OCI DevOps pipelines, OCI Data Science jobs register models in MLflow, and OKE hosts a production-ready inference service, giving you a single workflow from experiment to endpoint.
+
 This solution provisions an end-to-end MLOps workflow on OCI:
 
 - OKE cluster and networking
@@ -234,28 +238,28 @@ Use OCI DevOps to manage webhook registration automatically. This avoids payload
 
 1. In OCI Console, open:
    - `Developer Services` -> `DevOps` -> your project
-2. Go to `Triggers` and create a new `GitHub` trigger.
+2. Go to `Triggers` and create a new `MLOps-GitHub-Trigger` trigger.
 3. Select:
-   - the GitHub connection
+   - Connection type - GitHub
    - repository: `prasanthmp/cloud-native-samples`
    - event: `PUSH`
    - branch: `main`
    - file filters:
      - `oci-terraform-solutions/oke-mlops-mlflow/**`
      - `README.md`
-4. Set action to trigger build pipeline:
-   - `mlflow-training-build-pipeline`
-5. Save trigger and confirm it is `ACTIVE`.
-6. Copy the secret and URL (Required for configuring GitHub webhook)
-7. Wait ~1 minute for OCI to register webhook in GitHub.
+4. Add action to trigger build pipeline:
+   - Select `mlflow-training-build-pipeline`
+5. Select Event - Push
+6. Under Build run conditions, Enter source branch - (eg.prasanthmp/cloud-native-samples)
+7. Enter Files to include - (eg.oci-terraform-solutions/oke-mlops-mlflow/**)
+8. Click Add action
+9. Click Create. Now Trigger URL and Trigger secret will be displayed.  
+10. Save trigger and confirm it is `ACTIVE`.
+11. Copy the Trigger secret and Trigger URL (Required for configuring GitHub webhook)
+12. Wait ~1 minute for OCI to register webhook in GitHub.
 
-Important:
-- Prefer OCI-managed webhook registration.
-- Avoid manual webhook edits unless required by policy.
+### Configure GitHub webhook manually
 
-### If you must configure GitHub webhook manually
-
-Only do this if OCI cannot register webhook automatically and you have repo admin access.
 On GitHub, navigate to the main page of the repository. Under your repository name, click Settings. If you cannot see the "Settings" tab, select the dropdown menu, then click Settings. In the left sidebar, click Webhooks.
 
 1. In GitHub repo settings, open `Webhooks`.
@@ -267,9 +271,10 @@ On GitHub, navigate to the main page of the repository. Under your repository na
    - Events: `Just the push event`
 4. Save and test with a new push to `main`.
 
+Click on Recent Deliveries to see status of webhook. You should see a green tick mark if success.
+
 Notes:
 - `GitHub PAT` is for OCI connection auth and is different from webhook `Secret`.
-- If OCI UI does not expose a secret, use OCI-managed webhook flow instead of manual webhook setup.
 
 ### Common webhook errors
 
@@ -300,3 +305,14 @@ kubectl -n mlflow logs deployment/mlops-serving --tail=200
 1. Confirm image exists in OCIR.
 2. Confirm pull secret exists in `mlflow` namespace.
 3. Confirm DevOps deploy stage can read OCIR auth token secret.
+
+## Conclusion
+
+This solution provides a complete baseline for running MLOps on OCI with clear separation of concerns across infrastructure, training, model registry, and serving. By combining Terraform-managed resources with DevOps automation and Vault-backed secrets, it reduces operational drift and makes deployments easier to audit, reproduce, and scale.
+
+## Next Steps
+
+1. Add environment promotion (dev/stage/prod) with separate state and variable files.
+2. Add automated smoke tests in the build/deploy pipeline for `/health` and `/predict`.
+3. Enable model quality gates (accuracy thresholds, drift checks) before production rollout.
+4. Add observability dashboards and alerts for inference latency, error rate, and model/version usage.
