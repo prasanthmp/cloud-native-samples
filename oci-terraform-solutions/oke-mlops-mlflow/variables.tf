@@ -392,13 +392,6 @@ variable "devops_project_log_retention_duration" {
   default     = 30
 }
 
-variable "devops_github_connection_id" {
-  type        = string
-  description = "Existing OCI DevOps connection OCID for GitHub. If null, Terraform creates and manages one using devops_github_access_token_secret_id."
-  default     = null
-  nullable    = true
-}
-
 variable "devops_github_connection_name" {
   type        = string
   description = "Display name for the Terraform-managed OCI DevOps GitHub connection."
@@ -407,7 +400,7 @@ variable "devops_github_connection_name" {
 
 variable "devops_github_access_token_secret_id" {
   type        = string
-  description = "OCI Vault secret OCID storing the GitHub personal access token (required only when devops_github_connection_id is null)."
+  description = "OCI Vault secret OCID storing the GitHub personal access token used by the Terraform-managed OCI DevOps GitHub connection."
   default     = null
   nullable    = true
 }
@@ -482,17 +475,9 @@ variable "devops_build_ocir_username" {
   nullable    = true
 }
 
-variable "devops_build_ocir_auth_token" {
-  type        = string
-  description = "OCIR auth token passed into build_spec env. Prefer using OCI DevOps secret variables in production."
-  default     = null
-  nullable    = true
-  sensitive   = true
-}
-
 variable "devops_build_ocir_auth_token_secret_ocid" {
   type        = string
-  description = "OCI Vault secret OCID containing OCIR auth token. Build script can fetch and decode this secret at runtime when OCIR_AUTH_TOKEN is empty."
+  description = "OCI Vault secret OCID containing the OCIR auth token used by build and deploy stages."
   default     = null
   nullable    = true
 }

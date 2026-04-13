@@ -1,0 +1,62 @@
+# -----------------------------------------------------------------------------
+# OKE + MLflow + OCI DevOps + Data Science - terraform.tfvars example
+# -----------------------------------------------------------------------------
+# This file intentionally uses placeholders only. Replace <...> values before use.
+# Do not commit real secrets, OCIDs, tokens, or private keys.
+
+# Required OCI auth
+tenancy_ocid     = "<TENANCY_OCID>"
+user_ocid        = "<USER_OCID>"
+fingerprint      = "<API_KEY_FINGERPRINT>"
+private_key_path = "<ABSOLUTE_PATH_TO_OCI_API_PRIVATE_KEY_PEM>"
+region           = "<OCI_REGION>" # e.g. us-ashburn-1
+
+# Required core infrastructure
+compartment_id      = "<COMPARTMENT_OCID>"
+node_image_ocid     = "<NODE_IMAGE_OCID>"
+ssh_public_key_path = "<ABSOLUTE_PATH_TO_SSH_PUBLIC_KEY>"
+
+# Data Science job image (required for training)
+datascience_job_container_image = "<OCIR_IMAGE_FOR_TRAINING_JOB>" # e.g. <region>.ocir.io/<namespace>/mlops-training:latest
+
+# GitHub / DevOps source
+devops_repository_url = "<GIT_REPOSITORY_URL>" # e.g. https://github.com/<org>/<repo>.git
+
+# Terraform creates and manages the DevOps GitHub connection using this Vault secret.
+devops_github_access_token_secret_id = "<VAULT_SECRET_OCID_FOR_GITHUB_PAT>"
+
+# OCIR build/push settings
+devops_build_ocir_namespace = "<OCIR_NAMESPACE>"
+devops_build_ocir_username  = "<OCIR_NAMESPACE>/<OCI_USERNAME>"
+devops_build_ocir_auth_token_secret_ocid = "<VAULT_SECRET_OCID_FOR_OCIR_AUTH_TOKEN>"
+
+# MLflow artifact credentials for OCI Object Storage S3-compatible access
+# Choose one input path for each credential: direct value or Vault secret OCID.
+
+# Access key ID
+# mlflow_s3_access_key_id = "<OCI_CUSTOMER_SECRET_KEY_ACCESS_KEY_ID>"
+mlflow_s3_access_key_id_secret_ocid = "<VAULT_SECRET_OCID_FOR_MLFLOW_S3_ACCESS_KEY_ID>"
+
+# Secret access key
+# mlflow_s3_secret_access_key = "<OCI_CUSTOMER_SECRET_KEY_SECRET>"
+mlflow_s3_secret_access_key_secret_ocid = "<VAULT_SECRET_OCID_FOR_MLFLOW_S3_SECRET_ACCESS_KEY>"
+
+# Optional naming and notifications
+object_storage_root_bucket_name = "<OBJECT_STORAGE_ROOT_BUCKET_NAME>"
+devops_notification_emails      = ["<EMAIL_ADDRESS>"]
+
+# Optional network override examples
+# vcn_cidr              = "10.0.0.0/16"
+# api_subnet_cidr       = "10.0.0.0/24"
+# nodes_subnet_cidr     = "10.0.1.0/24"
+# lb_subnet_cidr        = "10.0.2.0/24"
+# datascience_subnet_cidr = "10.0.3.0/24"
+
+# Optional service naming overrides
+# cluster_name                  = "mlops-oke-cluster"
+# mlflow_namespace              = "mlflow"
+# serving_k8s_namespace         = "mlflow"
+# serving_k8s_deployment_name   = "mlops-serving"
+# serving_k8s_service_name      = "mlops-serving"
+# serving_mlflow_model_name     = "iris-logreg-model"
+# serving_mlflow_model_stage    = "Production"

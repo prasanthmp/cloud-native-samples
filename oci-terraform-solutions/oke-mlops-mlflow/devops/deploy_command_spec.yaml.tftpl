@@ -20,7 +20,6 @@ steps:
       IMAGE_URI="${ocir_region_code}.ocir.io/${ocir_namespace}/${ocir_repository}:${image_tag}"
       OCIR_REGISTRY="${ocir_region_code}.ocir.io"
       OCIR_USERNAME="${ocir_username}"
-      OCIR_AUTH_TOKEN="${ocir_auth_token}"
       OCIR_AUTH_TOKEN_SECRET_OCID="${ocir_auth_token_secret_ocid}"
       IMAGE_PULL_SECRET="${serving_image_pull_secret_name}"
 
@@ -52,13 +51,11 @@ steps:
       fi
       echo "Using MLflow tracking URI: $MLFLOW_TRACKING_URI"
 
-      if [ -z "$OCIR_AUTH_TOKEN" ] && [ -n "$OCIR_AUTH_TOKEN_SECRET_OCID" ]; then
-        TOKEN_B64="$(oci secrets secret-bundle get --secret-id "$OCIR_AUTH_TOKEN_SECRET_OCID" --query 'data."secret-bundle-content".content' --raw-output)"
-        OCIR_AUTH_TOKEN="$(printf '%s' "$TOKEN_B64" | base64 --decode)"
-      fi
-
       : "$${OCIR_USERNAME:?Set OCIR username in Terraform variable devops_build_ocir_username}"
-      : "$${OCIR_AUTH_TOKEN:?Set OCIR token (devops_build_ocir_auth_token) or OCIR token secret OCID (devops_build_ocir_auth_token_secret_ocid)}"
+      : "$${OCIR_AUTH_TOKEN_SECRET_OCID:?Set OCIR token secret OCID in Terraform variable devops_build_ocir_auth_token_secret_ocid}"
+
+      TOKEN_B64="$(oci secrets secret-bundle get --secret-id "$OCIR_AUTH_TOKEN_SECRET_OCID" --query 'data."secret-bundle-content".content' --raw-output)"
+      OCIR_AUTH_TOKEN="$(printf '%s' "$TOKEN_B64" | base64 --decode)"
 
       kubectl -n "$SERVING_NAMESPACE" create secret docker-registry "$IMAGE_PULL_SECRET" \
         --docker-server "$OCIR_REGISTRY" \

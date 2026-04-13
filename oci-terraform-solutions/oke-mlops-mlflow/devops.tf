@@ -16,7 +16,6 @@ resource "local_file" "devops_build_spec" {
     ocir_serving_repository     = local.devops_build_serving_ocir_repository_value
     image_tag                   = var.devops_build_image_tag
     ocir_username               = var.devops_build_ocir_username != null ? var.devops_build_ocir_username : ""
-    ocir_auth_token             = var.devops_build_ocir_auth_token != null ? var.devops_build_ocir_auth_token : ""
     ocir_auth_token_secret_ocid = var.devops_build_ocir_auth_token_secret_ocid != null ? var.devops_build_ocir_auth_token_secret_ocid : ""
   })
 }
@@ -40,7 +39,6 @@ resource "local_file" "devops_deploy_command_spec" {
     ocir_repository                = local.devops_build_serving_ocir_repository_value
     image_tag                      = var.devops_build_image_tag
     ocir_username                  = var.devops_build_ocir_username != null ? var.devops_build_ocir_username : ""
-    ocir_auth_token                = var.devops_build_ocir_auth_token != null ? var.devops_build_ocir_auth_token : ""
     ocir_auth_token_secret_ocid    = var.devops_build_ocir_auth_token_secret_ocid != null ? var.devops_build_ocir_auth_token_secret_ocid : ""
     serving_image_pull_secret_name = var.serving_image_pull_secret_name
   })
@@ -115,7 +113,7 @@ locals {
 }
 
 resource "oci_devops_connection" "github" {
-  count           = var.devops_github_connection_id == null ? 1 : 0
+  count           = 1
   project_id      = oci_devops_project.mlflow_training[0].id
   connection_type = "GITHUB_ACCESS_TOKEN"
   display_name    = var.devops_github_connection_name
@@ -124,15 +122,14 @@ resource "oci_devops_connection" "github" {
 
   lifecycle {
     precondition {
-      condition     = var.devops_github_connection_id != null || try(trimspace(var.devops_github_access_token_secret_id) != "", false)
-      error_message = "Set devops_github_connection_id, or provide devops_github_access_token_secret_id so Terraform can create a GitHub connection."
+      condition     = try(trimspace(var.devops_github_access_token_secret_id) != "", false)
+      error_message = "Set devops_github_access_token_secret_id so Terraform can create the GitHub connection."
     }
   }
 }
 
 locals {
-  managed_devops_github_connection_id   = var.devops_github_connection_id == null ? oci_devops_connection.github[0].id : null
-  effective_devops_github_connection_id = var.devops_github_connection_id != null ? var.devops_github_connection_id : local.managed_devops_github_connection_id
+  effective_devops_github_connection_id = oci_devops_connection.github[0].id
 }
 
 resource "oci_devops_build_pipeline" "mlflow_training" {
@@ -174,7 +171,6 @@ resource "oci_devops_deploy_artifact" "serving_command_spec" {
       ocir_repository                = local.devops_build_serving_ocir_repository_value
       image_tag                      = var.devops_build_image_tag
       ocir_username                  = var.devops_build_ocir_username != null ? var.devops_build_ocir_username : ""
-      ocir_auth_token                = var.devops_build_ocir_auth_token != null ? var.devops_build_ocir_auth_token : ""
       ocir_auth_token_secret_ocid    = var.devops_build_ocir_auth_token_secret_ocid != null ? var.devops_build_ocir_auth_token_secret_ocid : ""
       serving_image_pull_secret_name = var.serving_image_pull_secret_name
     }))
@@ -241,7 +237,7 @@ resource "oci_devops_build_pipeline_stage" "build_and_deploy" {
   lifecycle {
     precondition {
       condition     = try(trimspace(local.effective_devops_github_connection_id) != "", false)
-      error_message = "Provide devops_github_connection_id, or set devops_github_access_token_secret_id to let Terraform create one."
+      error_message = "Set devops_github_access_token_secret_id so Terraform can create the GitHub connection."
     }
     precondition {
       condition     = try(trimspace(var.devops_repository_url) != "", false)

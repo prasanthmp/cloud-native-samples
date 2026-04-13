@@ -89,7 +89,7 @@ output "devops_project_log_id" {
 }
 
 output "devops_github_connection_id" {
-  description = "Effective OCI DevOps GitHub connection OCID used by the pipeline/trigger"
+  description = "Terraform-managed OCI DevOps GitHub connection OCID used by the pipeline/trigger"
   value       = local.effective_devops_github_connection_id
 }
 

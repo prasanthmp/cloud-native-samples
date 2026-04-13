@@ -14,7 +14,6 @@ env:
     OCIR_SERVING_REPOSITORY: "mlops-serving"
     IMAGE_TAG: "latest"
     OCIR_USERNAME: "idxlfhtrvfsa/prasanth.prasad@oracle.com"
-    OCIR_AUTH_TOKEN: ""
     OCIR_AUTH_TOKEN_SECRET_OCID: "ocid1.vaultsecret.oc1.iad.amaaaaaak6zxdwaayveuyoez3pu6g5vypoewcqs637w53w375oeavdtcccya"
 steps:
   - type: Command
@@ -37,11 +36,11 @@ steps:
       else
         cd "${OCI_PRIMARY_SOURCE_DIR}"
       fi
-      if [ -n "${OCIR_NAMESPACE}" ] && [ -n "${OCIR_USERNAME}" ] && [ -n "${OCIR_AUTH_TOKEN}" -o -n "${OCIR_AUTH_TOKEN_SECRET_OCID}" ]; then
+      if [ -n "${OCIR_NAMESPACE}" ] && [ -n "${OCIR_USERNAME}" ] && [ -n "${OCIR_AUTH_TOKEN_SECRET_OCID}" ]; then
         export OCIR_REPOSITORY="${OCIR_TRAINING_REPOSITORY}"
         bash scripts/build_and_push_ocir_image.sh
       else
-        echo "OCIR env vars not fully set (need namespace, username, and token or secret OCID). Skipping container build/push."
+        echo "OCIR env vars not fully set (need namespace, username, and OCIR_AUTH_TOKEN_SECRET_OCID). Skipping container build/push."
       fi
   - type: Command
     name: Build and push serving image to OCIR
@@ -54,11 +53,11 @@ steps:
         echo "serving/ directory not found from OCI_PRIMARY_SOURCE_DIR=${OCI_PRIMARY_SOURCE_DIR}"
         exit 1
       fi
-      if [ -n "${OCIR_NAMESPACE}" ] && [ -n "${OCIR_USERNAME}" ] && [ -n "${OCIR_AUTH_TOKEN}" -o -n "${OCIR_AUTH_TOKEN_SECRET_OCID}" ]; then
+      if [ -n "${OCIR_NAMESPACE}" ] && [ -n "${OCIR_USERNAME}" ] && [ -n "${OCIR_AUTH_TOKEN_SECRET_OCID}" ]; then
         export OCIR_REPOSITORY="${OCIR_SERVING_REPOSITORY}"
         bash scripts/build_and_push_serving_ocir_image.sh
       else
-        echo "OCIR env vars not fully set (need namespace, username, and token or secret OCID). Skipping serving image build/push."
+        echo "OCIR env vars not fully set (need namespace, username, and OCIR_AUTH_TOKEN_SECRET_OCID). Skipping serving image build/push."
       fi
   - type: Command
     name: Package training code
