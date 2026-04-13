@@ -260,34 +260,3 @@ resource "oci_devops_build_pipeline_stage" "trigger_serving_deploy" {
     }
   }
 }
-
-
-resource "oci_devops_trigger" "github_push_build" {
-  count          = 1
-  project_id     = oci_devops_project.mlflow_training[0].id
-  display_name   = "github-push-trigger"
-  trigger_source = "GITHUB"
-  connection_id  = local.effective_devops_github_connection_id
-
-  actions {
-    type              = "TRIGGER_BUILD_PIPELINE"
-    build_pipeline_id = oci_devops_build_pipeline.mlflow_training[0].id
-
-    filter {
-      trigger_source = "GITHUB"
-      events         = ["PUSH"]
-
-      include {
-        head_ref        = "refs/heads/${var.devops_repository_branch}"
-        repository_name = trimsuffix(basename(var.devops_repository_url), ".git")
-
-        dynamic "file_filter" {
-          for_each = length(var.devops_trigger_file_paths) > 0 ? [1] : []
-          content {
-            file_paths = var.devops_trigger_file_paths
-          }
-        }
-      }
-    }
-  }
-}

@@ -355,19 +355,6 @@ resource "oci_datascience_project" "mlflow_test" {
   description    = "Project for testing MLflow on OKE from OCI Data Science notebook."
 }
 
-resource "oci_datascience_notebook_session" "mlflow_test" {
-  count          = var.create_datascience_notebook ? 1 : 0
-  compartment_id = var.compartment_id
-  project_id     = local.datascience_project_id
-  display_name   = var.datascience_notebook_name
-
-  notebook_session_configuration_details {
-    shape                     = var.datascience_notebook_shape
-    block_storage_size_in_gbs = var.datascience_notebook_block_storage_size_gb
-    subnet_id                 = local.datascience_subnet_id
-  }
-}
-
 resource "oci_datascience_job" "training" {
   count                   = 1
   compartment_id          = var.compartment_id

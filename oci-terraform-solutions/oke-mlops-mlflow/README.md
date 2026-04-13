@@ -2,7 +2,7 @@
 
 This reference implementation demonstrates how to run a practical MLOps platform on Oracle Cloud Infrastructure using Terraform as the control plane. It connects model training, tracking, artifact management, and serving into one automated lifecycle so teams can move from code changes to reproducible deployments with fewer manual handoffs.
 
-The stack is designed for operators and platform engineers who want repeatable infrastructure, centralized secrets handling, and CI/CD-driven model updates. GitHub pushes trigger OCI DevOps pipelines, OCI Data Science jobs register models in MLflow, and OKE hosts a production-ready inference service, giving you a single workflow from experiment to endpoint.
+The stack is designed for operators and platform engineers who want repeatable infrastructure, centralized secrets handling, and CI/CD-driven model updates. OCI DevOps pipelines, OCI Data Science jobs, and MLflow work together so you can run a single workflow from experiment to endpoint.
 
 This solution provisions an end-to-end MLOps workflow on OCI:
 
@@ -29,10 +29,10 @@ This solution provisions an end-to-end MLOps workflow on OCI:
 4. Confirm post-apply outputs:
    - `terraform output mlflow_url`
    - `terraform output -raw serving_url`
-   - `terraform output devops_github_trigger_id`
-5. Create or verify the OCI DevOps GitHub push trigger is ACTIVE and targets the build pipeline.
-6. Configure GitHub webhook to call the OCI DevOps trigger URL (or verify OCI-managed webhook registration if auto-created).
-7. Push a change to `main` under `oci-terraform-solutions/oke-mlops-mlflow/**` to trigger the pipeline.
+   - `terraform output devops_build_pipeline_id`
+5. Start the OCI DevOps build pipeline manually (Console or OCI CLI).
+6. Confirm the build run triggers Data Science training and then the deploy pipeline.
+7. Validate rollout in OKE.
 8. Validate deployment:
    - health endpoint: `GET /health`
    - prediction endpoint: `POST /predict`
@@ -42,17 +42,16 @@ This solution provisions an end-to-end MLOps workflow on OCI:
 
 ## Architecture Flow
 
-1. Push changes to `main`.
-2. OCI DevOps GitHub trigger starts the build pipeline.
-3. Build pipeline (`devops/build_spec.yaml`) installs dependencies, builds and pushes training/serving images, and triggers a Data Science job run.
-4. Build pipeline triggers deploy pipeline.
-5. Deploy stage (`devops/deploy_command_spec.yaml`) updates the serving app on OKE and prints the external serving URL.
+1. Start the OCI DevOps build pipeline.
+2. Build pipeline (`devops/build_spec.yaml`) installs dependencies, builds and pushes training/serving images, and triggers a Data Science job run.
+3. Build pipeline triggers deploy pipeline.
+4. Deploy stage (`devops/deploy_command_spec.yaml`) updates the serving app on OKE and prints the external serving URL.
 
 ## Repository Layout
 
 - `main.tf`: core infrastructure and Kubernetes resources
 - `oke.tf`: OKE provider/cluster bootstrap
-- `devops.tf`: DevOps project, pipelines, trigger wiring
+- `devops.tf`: DevOps project and pipeline wiring
 - `policies.tf`: IAM policies
 - `variables.tf`: input variables
 - `outputs.tf`: runtime outputs (URLs, IDs, repo names)
@@ -121,7 +120,6 @@ terraform output -raw serving_url
 terraform output datascience_job_id
 terraform output devops_build_pipeline_id
 terraform output devops_deploy_pipeline_id
-terraform output devops_github_trigger_id
 ```
 
 `serving_url` is a helper command string that waits for the service endpoint.
@@ -212,78 +210,26 @@ bash scripts/build_and_push_serving_ocir_image.sh
 3. Verify `policies.tf` has been applied.
 4. Re-run `terraform apply -var-file=terraform.tfvars`.
 
-### GitHub push does not trigger build pipeline
+### Build pipeline does not start or fails
 
-1. Verify trigger is active:
-
-```bash
-oci devops trigger get --trigger-id <trigger_ocid> --query 'data."lifecycle-state"' --raw-output
-```
-
-2. Verify trigger URL:
+1. List recent build runs:
 
 ```bash
-oci devops trigger get --trigger-id <trigger_ocid> --query 'data."trigger-url"' --raw-output
+oci devops build-run list --project-id <devops_project_ocid> --limit 5 --output table
 ```
 
-3. Check branch/path filters include:
-  - `main`
-  - `oci-terraform-solutions/oke-mlops-mlflow/**`
+2. Inspect a build run:
 
-If webhook is missing, recreate the trigger/connection or add the webhook manually in GitHub using the trigger URL.
+```bash
+oci devops build-run get --build-run-id <build_run_ocid> --output json
+```
 
-### Create OCI trigger and GitHub webhook (recommended flow)
+3. Verify required values are set:
+  - `devops_repository_url`
+  - `devops_github_access_token_secret_id`
+  - `devops_build_ocir_auth_token_secret_ocid`
 
-Use OCI DevOps to manage webhook registration automatically. This avoids payload URL/secret mismatch issues.
-
-1. In OCI Console, open:
-   - `Developer Services` -> `DevOps` -> your project
-2. Go to `Triggers` and create a new `MLOps-GitHub-Trigger` trigger.
-3. Select:
-   - Connection type - GitHub
-   - repository: `prasanthmp/cloud-native-samples`
-   - event: `PUSH`
-   - branch: `main`
-   - file filters:
-     - `oci-terraform-solutions/oke-mlops-mlflow/**`
-     - `README.md`
-4. Add action to trigger build pipeline:
-   - Select `mlflow-training-build-pipeline`
-5. Select Event - Push
-6. Under Build run conditions, Enter source branch - (eg.prasanthmp/cloud-native-samples)
-7. Enter Files to include - (eg.oci-terraform-solutions/oke-mlops-mlflow/**)
-8. Click Add action
-9. Click Create. Now Trigger URL and Trigger secret will be displayed.  
-10. Save trigger and confirm it is `ACTIVE`.
-11. Copy the Trigger secret and Trigger URL (Required for configuring GitHub webhook)
-12. Wait ~1 minute for OCI to register webhook in GitHub.
-
-### Configure GitHub webhook manually
-
-On GitHub, navigate to the main page of the repository. Under your repository name, click Settings. If you cannot see the "Settings" tab, select the dropdown menu, then click Settings. In the left sidebar, click Webhooks.
-
-1. In GitHub repo settings, open `Webhooks`.
-2. Delete old/invalid OCI webhook entries first.
-3. Create webhook with:
-   - `Payload URL`: OCI trigger listener URL from OCI trigger details
-   - `Content type`: `application/json`
-   - `Secret`: trigger webhook secret (must match OCI; not your GitHub PAT)
-   - Events: `Just the push event`
-4. Save and test with a new push to `main`.
-
-Click on Recent Deliveries to see status of webhook. You should see a green tick mark if success.
-
-Notes:
-- `GitHub PAT` is for OCI connection auth and is different from webhook `Secret`.
-
-### Common webhook errors
-
-- `Invalid payload URL or secret`:
-  - payload URL or webhook secret does not match trigger listener settings
-- `Unable to parse message body`:
-  - GitHub webhook content type is not `application/json`
-- Trigger ACTIVE but no build runs:
-  - check branch/path filters and webhook delivery status in GitHub
+4. Review stage logs in OCI DevOps Console for build/deploy failures.
 
 ### `/predict` returns `{"detail":"Model not loaded"}`
 

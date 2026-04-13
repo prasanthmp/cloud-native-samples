@@ -70,12 +70,6 @@ variable "node_pool_size" {
   default     = 1
 }
 
-variable "create_datascience_notebook" {
-  type        = bool
-  description = "If true, creates an OCI Data Science notebook session for MLflow testing."
-  default     = true
-}
-
 variable "create_datascience_project" {
   type        = bool
   description = "If true, creates an OCI Data Science project and uses it for jobs/notebooks."
@@ -98,24 +92,6 @@ variable "datascience_project_id" {
     condition     = var.create_datascience_project || var.datascience_project_id != null
     error_message = "Set datascience_project_id when create_datascience_project is false."
   }
-}
-
-variable "datascience_notebook_name" {
-  type        = string
-  description = "OCI Data Science notebook session display name"
-  default     = "mlops-mlflow-notebook"
-}
-
-variable "datascience_notebook_shape" {
-  type        = string
-  description = "Shape for OCI Data Science notebook session"
-  default     = "VM.Standard.E3.Flex"
-}
-
-variable "datascience_notebook_block_storage_size_gb" {
-  type        = number
-  description = "Notebook block storage size in GB"
-  default     = 50
 }
 
 variable "datascience_job_name" {
@@ -416,12 +392,6 @@ variable "devops_repository_branch" {
   type        = string
   description = "Git branch for OCI DevOps trigger/build source"
   default     = "main"
-}
-
-variable "devops_trigger_file_paths" {
-  type        = list(string)
-  description = "Optional list of repository paths to monitor for GitHub push trigger. When empty, all paths trigger builds."
-  default     = []
 }
 
 variable "devops_project_root" {

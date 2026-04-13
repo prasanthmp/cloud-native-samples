@@ -24,13 +24,13 @@ output "datascience_project_id" {
 }
 
 output "datascience_notebook_session_id" {
-  description = "OCI Data Science notebook session OCID for MLflow testing"
-  value       = var.create_datascience_notebook ? oci_datascience_notebook_session.mlflow_test[0].id : null
+  description = "Notebook session creation is disabled in this module."
+  value       = null
 }
 
 output "datascience_notebook_session_url" {
-  description = "OCI Data Science notebook session URL"
-  value       = var.create_datascience_notebook ? try(oci_datascience_notebook_session.mlflow_test[0].notebook_session_url, null) : null
+  description = "Notebook session creation is disabled in this module."
+  value       = null
 }
 
 output "datascience_job_id" {
@@ -116,11 +116,6 @@ output "devops_deploy_pipeline_id" {
 output "devops_deploy_stage_id" {
   description = "OCI DevOps deploy stage OCID for serving deployment"
   value       = var.create_devops_deploy_pipeline ? oci_devops_deploy_stage.deploy_serving_shell[0].id : null
-}
-
-output "devops_github_trigger_id" {
-  description = "OCI DevOps GitHub trigger OCID"
-  value       = oci_devops_trigger.github_push_build[0].id
 }
 
 output "policy_oke_cluster_id" {
