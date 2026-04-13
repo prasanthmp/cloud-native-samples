@@ -358,6 +358,7 @@ Important:
 ### If you must configure GitHub webhook manually
 
 Only do this if OCI cannot register webhook automatically and you have repo admin access.
+On GitHub, navigate to the main page of the repository. Under your repository name, click Settings. If you cannot see the "Settings" tab, select the dropdown menu, then click Settings. In the left sidebar, click Webhooks.
 
 1. In GitHub repo settings, open `Webhooks`.
 2. Delete old/invalid OCI webhook entries first.
